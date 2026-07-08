@@ -15,7 +15,7 @@
   *{box-sizing:border-box;}
   body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;background:var(--bg);color:var(--text);overflow-x:hidden;}
   .app{display:flex;min-height:100vh;width:100%;max-width:100vw;}
-  .sidebar{width:220px;background:var(--navy);color:#cfd8e3;flex-shrink:0;}
+  .sidebar{width:220px;background:var(--navy);color:#cfd8e3;flex-shrink:0;position:sticky;top:0;align-self:flex-start;height:100vh;overflow-y:auto;}
   .brand{padding:20px 20px;font-weight:700;font-size:18px;color:#fff;border-bottom:1px solid rgba(255,255,255,.08);}
   .brand span{color:#4fa3e3;}
   .nav-item{padding:12px 20px;font-size:13px;cursor:default;border-left:3px solid transparent;}
@@ -38,6 +38,8 @@
   .kpi.blue{background:var(--blue);} .kpi.yellow{background:var(--yellow);color:#3a2e00;}
   .kpi.purple{background:var(--purple);} .kpi.navy{background:var(--navy);}
   .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:14px;}
+  .split-row{display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start;}
+  @media (max-width:900px){ .split-row{grid-template-columns:1fr;} }
   .card{background:var(--card);border:1px solid var(--border);border-radius:6px;padding:16px;}
   .card h3{margin:0 0 12px;font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.03em;font-weight:600;}
   canvas{max-width:100%;}
@@ -105,56 +107,58 @@
         <div class="kpi yellow"><div class="val" id="ov-avgPos">–</div><div class="lbl">SEO Avg Position</div></div>
         <div class="kpi red"><div class="val" id="ov-ctr">–</div><div class="lbl">SEO CTR</div></div>
       </div>
-      <div class="card" style="margin-top:14px;">
-        <h3>📌 Recommendations — How to Scale Leads &amp; Improve SEO</h3>
-        <div id="recommendations"><div class="placeholder">Sign in to generate recommendations from your live data.</div></div>
-      </div>
 
-      <!-- TRAFFIC -->
-      <div class="section-title">📈 Traffic</div>
-      <div class="kpi-row">
-        <div class="kpi green"><div class="val" id="kpi-totalUsers">–</div><div class="lbl">Total Users (28d)</div></div>
-        <div class="kpi blue"><div class="val" id="kpi-newUsers">–</div><div class="lbl">New Users (28d)</div></div>
-        <div class="kpi navy"><div class="val" id="kpi-sessions">–</div><div class="lbl">Sessions (28d)</div></div>
-        <div class="kpi purple"><div class="val" id="kpi-engRate">–</div><div class="lbl">Engagement Rate</div></div>
-      </div>
-      <div class="card" style="margin-top:14px;">
-        <h3>Monthly Sessions + Trend</h3>
-        <canvas id="sessionsChart" height="85"></canvas>
-      </div>
-
-      <!-- ACQUISITION -->
-      <div class="section-title">🔗 Acquisition (sessions by channel, 28d)</div>
-      <div class="card"><canvas id="acqChart" height="90"></canvas></div>
-
-      <!-- ENGAGEMENT -->
-      <div class="section-title">⏱ Engagement</div>
-      <div class="grid2">
-        <div class="card">
-          <h3>Average Engagement Time</h3>
-          <div class="bi-card" style="border:none;padding:6px;">
-            <div class="val" id="kpi-avgEngTime">–</div>
-            <div class="lbl">per session (28 days)</div>
+      <!-- TRAFFIC + ACQUISITION (side by side) -->
+      <div class="split-row">
+        <div>
+          <div class="section-title">📈 Traffic</div>
+          <div class="kpi-row" style="grid-template-columns:repeat(2,1fr);">
+            <div class="kpi green"><div class="val" id="kpi-totalUsers">–</div><div class="lbl">Total Users (28d)</div></div>
+            <div class="kpi blue"><div class="val" id="kpi-newUsers">–</div><div class="lbl">New Users (28d)</div></div>
+            <div class="kpi navy"><div class="val" id="kpi-sessions">–</div><div class="lbl">Sessions (28d)</div></div>
+            <div class="kpi purple"><div class="val" id="kpi-engRate">–</div><div class="lbl">Engagement Rate</div></div>
+          </div>
+          <div class="card" style="margin-top:14px;">
+            <h3>Monthly Sessions + Trend</h3>
+            <canvas id="sessionsChart" height="110"></canvas>
           </div>
         </div>
-        <div class="card">
-          <h3>Top Landing Pages (GA4, by Sessions)</h3>
-          <table class="mini" id="tbl-landing"><thead><tr><th>Page</th><th>Sessions</th></tr></thead><tbody></tbody></table>
+        <div>
+          <div class="section-title">🔗 Acquisition (sessions by channel, 28d)</div>
+          <div class="card"><canvas id="acqChart" height="110"></canvas></div>
         </div>
       </div>
 
-      <!-- LEAD GENERATION -->
-      <div class="section-title">🎯 Lead Generation (GA4 events, 28d)</div>
-      <div class="kpi-row" style="grid-template-columns:repeat(3,1fr);">
-        <div class="kpi red"><div class="val" id="kpi-ev-form">–</div><div class="lbl">Wix Form Submissions</div></div>
-        <div class="kpi yellow"><div class="val" id="kpi-ev-quote">–</div><div class="lbl">Quote Requests</div></div>
-        <div class="kpi blue"><div class="val" id="kpi-ev-messenger">–</div><div class="lbl">Messenger Clicks</div></div>
+      <!-- ENGAGEMENT + LEAD GENERATION (side by side) -->
+      <div class="split-row">
+        <div>
+          <div class="section-title">⏱ Engagement</div>
+          <div class="card">
+            <h3>Average Engagement Time</h3>
+            <div class="bi-card" style="border:none;padding:6px;">
+              <div class="val" id="kpi-avgEngTime">–</div>
+              <div class="lbl">per session (28 days)</div>
+            </div>
+          </div>
+          <div class="card" style="margin-top:14px;">
+            <h3>Top Landing Pages (GA4, by Sessions)</h3>
+            <table class="mini" id="tbl-landing"><thead><tr><th>Page</th><th>Sessions</th></tr></thead><tbody></tbody></table>
+          </div>
+        </div>
+        <div>
+          <div class="section-title">🎯 Lead Generation (GA4 events, 28d)</div>
+          <div class="kpi-row" style="grid-template-columns:repeat(3,1fr);">
+            <div class="kpi red"><div class="val" id="kpi-ev-form">–</div><div class="lbl">Wix Form Submissions</div></div>
+            <div class="kpi yellow"><div class="val" id="kpi-ev-quote">–</div><div class="lbl">Quote Requests</div></div>
+            <div class="kpi blue"><div class="val" id="kpi-ev-messenger">–</div><div class="lbl">Messenger Clicks</div></div>
+          </div>
+          <div class="card" style="margin-top:14px;">
+            <h3>Lead Events — Daily Trend (28 days)</h3>
+            <canvas id="leadEventsChart" height="110"></canvas>
+          </div>
+          <div class="note" id="lead-event-note"></div>
+        </div>
       </div>
-      <div class="card" style="margin-top:14px;">
-        <h3>Lead Events — Daily Trend (28 days)</h3>
-        <canvas id="leadEventsChart" height="80"></canvas>
-      </div>
-      <div class="note" id="lead-event-note"></div>
 
       <!-- SEO -->
       <div class="section-title">🔍 SEO (Search Console, 28d)</div>
@@ -204,6 +208,12 @@
         so these numbers always match. Losses this period: <b id="bi-losses">–</b>. Mapping: MQL = Discovery/Evaluation/Intent stage leads;
         SQL = Engineering RFQ Yes; Proposals Sent = Engineering RFQ Yes (same count, since your sheet doesn't separately track proposal-send date);
         Projects Won = your sheet's "Wins" cell.
+      </div>
+
+      <!-- RECOMMENDATIONS -->
+      <div class="section-title">📌 Recommendations — How to Scale Leads &amp; Improve SEO</div>
+      <div class="card">
+        <div id="recommendations"><div class="placeholder">Sign in to generate recommendations from your live data.</div></div>
       </div>
     </div>
   </div>
