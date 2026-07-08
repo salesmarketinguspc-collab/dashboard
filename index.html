@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Siegen Marketing Live Dashboard</title>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.4/chart.umd.min.js"></script>
+<style>
+  :root{
+    --navy:#12233d; --navy-2:#1a3252; --bg:#eef1f4; --card:#ffffff;
+    --green:#3bb54a; --red:#e6483a; --blue:#3c8ce0; --yellow:#f2b705;
+    --text:#1c2b3a; --muted:#7a8896; --border:#e3e8ee;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;background:var(--bg);color:var(--text);}
+  .app{display:flex;min-height:100vh;}
+  /* Sidebar */
+  .sidebar{width:230px;background:var(--navy);color:#cfd8e3;flex-shrink:0;}
+  .brand{padding:20px 20px;font-weight:700;font-size:18px;color:#fff;border-bottom:1px solid rgba(255,255,255,.08);}
+  .brand span{color:#4fa3e3;}
+  .nav-item{padding:13px 20px;font-size:14px;cursor:default;border-left:3px solid transparent;}
+  .nav-item.active{background:var(--navy-2);border-left:3px solid #4fa3e3;color:#fff;}
+  /* Main */
+  .main{flex:1;display:flex;flex-direction:column;min-width:0;}
+  .topbar{background:var(--navy);color:#fff;padding:12px 24px;display:flex;justify-content:space-between;align-items:center;font-size:14px;}
+  .topbar .status{display:flex;align-items:center;gap:10px;}
+  .dot{width:8px;height:8px;border-radius:50%;background:#3bb54a;}
+  .dot.off{background:#e6483a;}
+  #signin-btn{margin-left:12px;}
+  .content{padding:22px 26px;}
+  .kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:18px;}
+  .kpi{border-radius:6px;padding:18px 20px;color:#fff;position:relative;overflow:hidden;min-height:76px;}
+  .kpi .val{font-size:26px;font-weight:700;line-height:1.1;}
+  .kpi .lbl{font-size:12px;opacity:.9;margin-top:4px;}
+  .kpi .icon{position:absolute;right:16px;top:16px;font-size:20px;}
+  .kpi.green{background:var(--green);}
+  .kpi.red{background:var(--red);}
+  .kpi.blue{background:var(--blue);}
+  .kpi.yellow{background:var(--yellow);color:#3a2e00;}
+  .grid2{display:grid;grid-template-columns:1fr 2fr;gap:16px;margin-bottom:16px;}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:6px;padding:16px;}
+  .card h3{margin:0 0 12px;font-size:13px;color:var(--muted);text-transform:uppercase;letter-spacing:.03em;font-weight:600;}
+  .bottom-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+  canvas{max-width:100%;}
+  .placeholder{color:var(--muted);font-size:13px;text-align:center;padding:40px 10px;}
+  .config-banner{background:#fff3cd;border:1px solid #ffe08a;color:#5c4300;padding:10px 16px;font-size:13px;border-radius:6px;margin-bottom:16px;display:none;}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="sidebar">
+    <div class="brand">Siegen<span>Marketing</span></div>
+    <div class="nav-item active">📈 Live Dashboard</div>
+    <div class="nav-item">🗂 Leads (see CRM file)</div>
+    <div class="nav-item">📅 Weekly Report</div>
+    <div class="nav-item">📤 Export</div>
+  </div>
+
+  <div class="main">
+    <div class="topbar">
+      <div>United Siegen Philippines — Marketing Performance</div>
+      <div class="status">
+        <span class="dot off" id="conn-dot"></span>
+        <span id="conn-text">Not connected</span>
+        <button id="signin-btn">Sign in with Google</button>
+      </div>
+    </div>
+
+    <div class="content">
+      <div class="config-banner" id="config-banner">
+        ⚠️ Fill in CLIENT_ID, GA4_PROPERTY_ID and GSC_SITE_URL at the top of the script before this will work. See comments in the file.
+      </div>
+
+      <div class="kpi-row">
+        <div class="kpi green"><div class="icon">▲</div><div class="val" id="kpi-sessions">–</div><div class="lbl">GA4 Sessions (28 days)</div></div>
+        <div class="kpi red"><div class="icon">▼</div><div class="val" id="kpi-ctr">–</div><div class="lbl">Search Console CTR</div></div>
+        <div class="kpi blue"><div class="icon">✔</div><div class="val" id="kpi-users">–</div><div class="lbl">GA4 Users (28 days)</div></div>
+        <div class="kpi yellow"><div class="icon">⚠</div><div class="val" id="kpi-updated">–</div><div class="lbl">Last Updated</div></div>
+      </div>
+
+      <div class="card" style="margin-bottom:16px;">
+        <h3>Monthly Sessions + Trend</h3>
+        <canvas id="sessionsChart" height="90"></canvas>
+      </div>
+
+      <div class="bottom-row">
+        <div class="card">
+          <h3>Top Search Queries (Clicks)</h3>
+          <canvas id="queriesChart" height="180"></canvas>
+        </div>
+        <div class="card">
+          <h3>Sessions by Channel</h3>
+          <canvas id="channelChart" height="180"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* =========================================================
+   FILL THESE THREE VALUES IN, THEN SAVE + PUSH TO GITHUB
+   ========================================================= */
+const CONFIG = {
+  CLIENT_ID: "YOUR_CLIENT_ID.apps.googleusercontent.com",
+  GA4_PROPERTY_ID: "YOUR_GA4_PROPERTY_ID",      // just the number, e.g. "123456789"
+  GSC_SITE_URL: "https://your-site.com/"        // exactly as shown in Search Console, include trailing slash or "sc-domain:yoursite.com"
+};
+/* ========================================================= */
+
+const SCOPES = "https://www.googleapis.com/auth/analytics.readonly https://www.googleapis.com/auth/webmasters.readonly";
+let accessToken = null;
+let tokenClient = null;
+let charts = {};
+
+if (CONFIG.CLIENT_ID.startsWith("YOUR_")) {
+  document.getElementById('config-banner').style.display = 'block';
+}
+
+window.onload = () => {
+  if (!window.google || CONFIG.CLIENT_ID.startsWith("YOUR_")) return;
+  tokenClient = google.accounts.oauth2.initTokenClient({
+    client_id: CONFIG.CLIENT_ID,
+    scope: SCOPES,
+    callback: (resp) => {
+      if (resp.error) { alert("Sign-in failed: " + resp.error); return; }
+      accessToken = resp.access_token;
+      document.getElementById('conn-dot').classList.remove('off');
+      document.getElementById('conn-text').textContent = "Connected";
+      document.getElementById('signin-btn').textContent = "Refresh data";
+      loadAll();
+    }
+  });
+};
+
+document.getElementById('signin-btn').addEventListener('click', () => {
+  if (!tokenClient) { alert("Fill in CLIENT_ID at the top of the script first."); return; }
+  tokenClient.requestAccessToken();
+});
+
+async function ga4Report(body) {
+  const res = await fetch(`https://analyticsdata.googleapis.com/v1beta/properties/${CONFIG.GA4_PROPERTY_ID}:runReport`, {
+    method: "POST",
+    headers: { "Authorization": "Bearer " + accessToken, "Content-Type": "application/json" },
+    body: JSON.stringify(body)
+  });
+  if (!res.ok) throw new Error("GA4 API error: " + res.status + " " + await res.text());
+  return res.json();
+}
+
+async function gscQuery(body) {
+  const site = encodeURIComponent(CONFIG.GSC_SITE_URL);
+  const res = await fetch(`https://www.googleapis.com/webmasters/v3/sites/${site}/searchAnalytics/query`, {
+    method: "POST",
+    headers: { "Authorization": "Bearer " + accessToken, "Content-Type": "application/json" },
+    body: JSON.stringify(body)
+  });
+  if (!res.ok) throw new Error("Search Console API error: " + res.status + " " + await res.text());
+  return res.json();
+}
+
+function fmtDate(d) { return d.toISOString().slice(0,10); }
+
+async function loadAll() {
+  const today = new Date();
+  const start28 = new Date(today); start28.setDate(today.getDate() - 28);
+  const start12mo = new Date(today); start12mo.setMonth(today.getMonth() - 11);
+
+  try {
+    // KPI: sessions + users, last 28 days
+    const totals = await ga4Report({
+      dateRanges: [{ startDate: fmtDate(start28), endDate: fmtDate(today) }],
+      metrics: [{ name: "sessions" }, { name: "activeUsers" }]
+    });
+    const row = totals.rows && totals.rows[0];
+    document.getElementById('kpi-sessions').textContent = row ? Number(row.metricValues[0].value).toLocaleString() : "0";
+    document.getElementById('kpi-users').textContent = row ? Number(row.metricValues[1].value).toLocaleString() : "0";
+    document.getElementById('kpi-updated').textContent = today.toLocaleDateString();
+
+    // Monthly sessions trend, last 12 months
+    const monthly = await ga4Report({
+      dateRanges: [{ startDate: fmtDate(start12mo), endDate: fmtDate(today) }],
+      dimensions: [{ name: "yearMonth" }],
+      metrics: [{ name: "sessions" }],
+      orderBys: [{ dimension: { dimensionName: "yearMonth" } }]
+    });
+    const months = (monthly.rows || []).map(r => r.dimensionValues[0].value);
+    const sessions = (monthly.rows || []).map(r => Number(r.metricValues[0].value));
+    renderBarTrend('sessionsChart', months, sessions, "Sessions");
+
+    // Sessions by channel
+    const channel = await ga4Report({
+      dateRanges: [{ startDate: fmtDate(start28), endDate: fmtDate(today) }],
+      dimensions: [{ name: "sessionDefaultChannelGroup" }],
+      metrics: [{ name: "sessions" }],
+      orderBys: [{ metric: { metricName: "sessions" }, desc: true }]
+    });
+    const chLabels = (channel.rows || []).map(r => r.dimensionValues[0].value);
+    const chValues = (channel.rows || []).map(r => Number(r.metricValues[0].value));
+    renderDonut('channelChart', chLabels, chValues);
+
+    // Search Console: CTR + top queries, last 28 days
+    const gscTotals = await gscQuery({
+      startDate: fmtDate(start28), endDate: fmtDate(today), dimensions: []
+    });
+    const gRow = gscTotals.rows && gscTotals.rows[0];
+    document.getElementById('kpi-ctr').textContent = gRow ? (gRow.ctr * 100).toFixed(1) + "%" : "0%";
+
+    const gscQueries = await gscQuery({
+      startDate: fmtDate(start28), endDate: fmtDate(today), dimensions: ["query"], rowLimit: 8
+    });
+    const qLabels = (gscQueries.rows || []).map(r => r.keys[0]);
+    const qValues = (gscQueries.rows || []).map(r => r.clicks);
+    renderBars('queriesChart', qLabels, qValues, "Clicks");
+
+  } catch (err) {
+    console.error(err);
+    alert("Error loading data — check your GA4_PROPERTY_ID / GSC_SITE_URL and that your Google account has access. Details in browser console.");
+  }
+}
+
+function renderBarTrend(canvasId, labels, data, label) {
+  if (charts[canvasId]) charts[canvasId].destroy();
+  const ctx = document.getElementById(canvasId);
+  charts[canvasId] = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [
+        { type: 'bar', label, data, backgroundColor: '#4fa3e3', borderRadius: 3 },
+        { type: 'line', label: 'Trend', data, borderColor: '#7a8896', borderDash: [4,4], pointRadius: 0, borderWidth: 1.5, fill: false, tension: 0.3 }
+      ]
+    },
+    options: { responsive: true, plugins: { legend: { position: 'bottom' } }, scales: { y: { beginAtZero: true } } }
+  });
+}
+
+function renderBars(canvasId, labels, data, label) {
+  if (charts[canvasId]) charts[canvasId].destroy();
+  const ctx = document.getElementById(canvasId);
+  charts[canvasId] = new Chart(ctx, {
+    type: 'bar',
+    data: { labels, datasets: [{ label, data, backgroundColor: '#4fa3e3', borderRadius: 3 }] },
+    options: { indexAxis: 'y', responsive: true, plugins: { legend: { display: false } } }
+  });
+}
+
+function renderDonut(canvasId, labels, data) {
+  if (charts[canvasId]) charts[canvasId].destroy();
+  const ctx = document.getElementById(canvasId);
+  const colors = ['#e6483a','#3bb54a','#f2b705','#4fa3e3','#8e6ee6','#12233d','#e07b39','#6ec6c1'];
+  charts[canvasId] = new Chart(ctx, {
+    type: 'doughnut',
+    data: { labels, datasets: [{ data, backgroundColor: colors }] },
+    options: { responsive: true, plugins: { legend: { position: 'bottom' } } }
+  });
+}
+</script>
+</body>
+</html>
