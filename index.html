@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Siegen Marketing Live Dashboard</title>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.4/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
 <style>
   :root{
     --navy:#12233d; --navy-2:#1a3252; --bg:#eef1f4; --card:#ffffff;
@@ -163,6 +163,10 @@ async function gscQuery(body) {
 function fmtDate(d) { return d.toISOString().slice(0,10); }
 
 async function loadAll() {
+  if (typeof Chart === "undefined") {
+    alert("The charting library (Chart.js) didn't load — this is usually an ad blocker or privacy extension blocking the CDN. Try disabling it for this site, or open in a private/incognito window, then click Refresh data again.");
+    return;
+  }
   const today = new Date();
   const start28 = new Date(today); start28.setDate(today.getDate() - 28);
   const start12mo = new Date(today); start12mo.setMonth(today.getMonth() - 11);
