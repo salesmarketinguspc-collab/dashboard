@@ -13,8 +13,8 @@
     --text:#1c2b3a; --muted:#7a8896; --border:#e3e8ee;
   }
   *{box-sizing:border-box;}
-  body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;background:var(--bg);color:var(--text);}
-  .app{display:flex;min-height:100vh;}
+  body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;background:var(--bg);color:var(--text);overflow-x:hidden;}
+  .app{display:flex;min-height:100vh;width:100%;}
   /* Sidebar */
   .sidebar{width:230px;background:var(--navy);color:#cfd8e3;flex-shrink:0;}
   .brand{padding:20px 20px;font-weight:700;font-size:18px;color:#fff;border-bottom:1px solid rgba(255,255,255,.08);}
@@ -22,8 +22,8 @@
   .nav-item{padding:13px 20px;font-size:14px;cursor:default;border-left:3px solid transparent;}
   .nav-item.active{background:var(--navy-2);border-left:3px solid #4fa3e3;color:#fff;}
   /* Main */
-  .main{flex:1;display:flex;flex-direction:column;min-width:0;}
-  .topbar{background:var(--navy);color:#fff;padding:12px 24px;display:flex;justify-content:space-between;align-items:center;font-size:14px;}
+  .main{flex:1;display:flex;flex-direction:column;min-width:0;max-width:100%;}
+  .topbar{background:var(--navy);color:#fff;padding:12px 24px;display:flex;justify-content:space-between;align-items:center;font-size:14px;flex-wrap:wrap;gap:8px;}
   .topbar .status{display:flex;align-items:center;gap:10px;}
   .dot{width:8px;height:8px;border-radius:50%;background:#3bb54a;}
   .dot.off{background:#e6483a;}
@@ -45,6 +45,19 @@
   canvas{max-width:100%;}
   .placeholder{color:var(--muted);font-size:13px;text-align:center;padding:40px 10px;}
   .config-banner{background:#fff3cd;border:1px solid #ffe08a;color:#5c4300;padding:10px 16px;font-size:13px;border-radius:6px;margin-bottom:16px;display:none;}
+  .content{overflow-x:hidden;}
+  .app{max-width:100vw;}
+  .modal-overlay{display:none;position:fixed;inset:0;background:rgba(18,35,61,.55);z-index:50;align-items:center;justify-content:center;}
+  .modal-overlay.show{display:flex;}
+  .modal-box{background:#fff;border-radius:8px;max-width:520px;width:92%;max-height:82vh;overflow-y:auto;padding:26px 28px;position:relative;box-shadow:0 20px 50px rgba(0,0,0,.3);}
+  .modal-close{position:absolute;top:12px;right:14px;background:none;border:none;font-size:22px;color:var(--muted);cursor:pointer;line-height:1;}
+  .modal-box h2{margin:0 0 4px;font-size:18px;color:var(--navy);}
+  .modal-box .sub{color:var(--muted);font-size:12px;margin-bottom:16px;}
+  .report-row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);font-size:14px;}
+  .report-row b{color:var(--navy);}
+  .report-section{margin-top:18px;font-size:12px;text-transform:uppercase;letter-spacing:.03em;color:var(--muted);font-weight:600;}
+  .modal-box ul{padding-left:18px;font-size:14px;line-height:1.6;}
+  .modal-box button.action{margin-top:18px;background:var(--navy);color:#fff;border:none;padding:9px 16px;border-radius:5px;cursor:pointer;font-size:13px;}
 </style>
 </head>
 <body>
@@ -52,9 +65,9 @@
   <div class="sidebar">
     <div class="brand">Siegen<span>Marketing</span></div>
     <div class="nav-item active">📈 Live Dashboard</div>
-    <div class="nav-item">🗂 Leads (see CRM file)</div>
-    <div class="nav-item">📅 Weekly Report</div>
-    <div class="nav-item">📤 Export</div>
+    <div class="nav-item" id="nav-leads" style="cursor:pointer;">🗂 Leads (see CRM file)</div>
+    <div class="nav-item" id="nav-weekly" style="cursor:pointer;">📅 Weekly Report</div>
+    <div class="nav-item" id="nav-export" style="cursor:pointer;">📤 Export</div>
   </div>
 
   <div class="main">
@@ -98,6 +111,13 @@
   </div>
 </div>
 
+<div class="modal-overlay" id="modal-overlay">
+  <div class="modal-box">
+    <button class="modal-close" id="modal-close">&times;</button>
+    <div id="modal-body"></div>
+  </div>
+</div>
+
 <script>
 /* =========================================================
    FILL THESE THREE VALUES IN, THEN SAVE + PUSH TO GITHUB
@@ -113,6 +133,7 @@ const SCOPES = "https://www.googleapis.com/auth/analytics.readonly https://www.g
 let accessToken = null;
 let tokenClient = null;
 let charts = {};
+let lastData = null; // populated after a successful loadAll()
 
 if (CONFIG.CLIENT_ID.startsWith("YOUR_")) {
   document.getElementById('config-banner').style.display = 'block';
@@ -218,6 +239,18 @@ async function loadAll() {
     const qValues = (gscQueries.rows || []).map(r => r.clicks);
     renderBars('queriesChart', qLabels, qValues, "Clicks");
 
+    lastData = {
+      generatedAt: today,
+      sessions28: row ? Number(row.metricValues[0].value) : 0,
+      users28: row ? Number(row.metricValues[1].value) : 0,
+      ctr: gRow ? (gRow.ctr * 100).toFixed(2) : "0",
+      clicks: gRow ? gRow.clicks : 0,
+      impressions: gRow ? gRow.impressions : 0,
+      monthly: months.map((m, i) => ({ month: m, sessions: sessions[i] })),
+      channels: chLabels.map((c, i) => ({ channel: c, sessions: chValues[i] })),
+      queries: qLabels.map((q, i) => ({ query: q, clicks: qValues[i] }))
+    };
+
   } catch (err) {
     console.error(err);
     alert("Error loading data — check your GA4_PROPERTY_ID / GSC_SITE_URL and that your Google account has access. Details in browser console.");
@@ -260,6 +293,84 @@ function renderDonut(canvasId, labels, data) {
     options: { responsive: true, plugins: { legend: { position: 'bottom' } } }
   });
 }
+
+/* ---------- Sidebar nav actions ---------- */
+const modalOverlay = document.getElementById('modal-overlay');
+const modalBody = document.getElementById('modal-body');
+document.getElementById('modal-close').addEventListener('click', () => modalOverlay.classList.remove('show'));
+modalOverlay.addEventListener('click', (e) => { if (e.target === modalOverlay) modalOverlay.classList.remove('show'); });
+
+function openModal(html) {
+  modalBody.innerHTML = html;
+  modalOverlay.classList.add('show');
+}
+
+document.getElementById('nav-leads').addEventListener('click', () => {
+  openModal(`
+    <h2>Leads (CRM)</h2>
+    <div class="sub">Not part of this live dashboard</div>
+    <p style="font-size:14px;line-height:1.6;">Your prospect and lead pipeline is tracked separately in the
+    <b>Siegen Marketing Lead Dashboard.xlsx</b> workbook (Leads / Weekly Summary / Monthly Report / Source Attribution tabs).
+    That file lives on your computer or wherever you saved it — it isn't hosted on the web, so there's no live link to show here.</p>
+    <p style="font-size:14px;line-height:1.6;">If you'd like leads to show up on this page too, the workbook could be uploaded to
+    Google Sheets and connected — just ask and we can wire that up next.</p>
+  `);
+});
+
+document.getElementById('nav-export').addEventListener('click', () => {
+  if (!lastData) { alert("Sign in and let the dashboard load data first, then Export."); return; }
+  const lines = [];
+  lines.push("Siegen Marketing Dashboard Export");
+  lines.push("Generated," + lastData.generatedAt.toISOString());
+  lines.push("");
+  lines.push("Metric,Value");
+  lines.push(`GA4 Sessions (28 days),${lastData.sessions28}`);
+  lines.push(`GA4 Users (28 days),${lastData.users28}`);
+  lines.push(`Search Console CTR (28 days),${lastData.ctr}%`);
+  lines.push(`Search Console Clicks (28 days),${lastData.clicks}`);
+  lines.push(`Search Console Impressions (28 days),${lastData.impressions}`);
+  lines.push("");
+  lines.push("Month,Sessions");
+  lastData.monthly.forEach(m => lines.push(`${m.month},${m.sessions}`));
+  lines.push("");
+  lines.push("Channel,Sessions");
+  lastData.channels.forEach(c => lines.push(`${c.channel},${c.sessions}`));
+  lines.push("");
+  lines.push("Search Query,Clicks");
+  lastData.queries.forEach(q => lines.push(`"${q.query.replace(/"/g,'""')}",${q.clicks}`));
+
+  const blob = new Blob([lines.join("\n")], { type: "text/csv" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `siegen-dashboard-export-${fmtDate(lastData.generatedAt)}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+});
+
+document.getElementById('nav-weekly').addEventListener('click', () => {
+  if (!lastData) { alert("Sign in and let the dashboard load data first, then open the Weekly Report."); return; }
+  const monthlyRows = lastData.monthly.map(m => `<div class="report-row"><span>${m.month}</span><b>${m.sessions.toLocaleString()}</b></div>`).join("");
+  const channelRows = lastData.channels.map(c => `<div class="report-row"><span>${c.channel}</span><b>${c.sessions.toLocaleString()}</b></div>`).join("");
+  const queryRows = lastData.queries.slice(0,5).map(q => `<div class="report-row"><span>${q.query}</span><b>${q.clicks} clicks</b></div>`).join("");
+  openModal(`
+    <h2>Weekly Report</h2>
+    <div class="sub">Generated ${lastData.generatedAt.toLocaleString()} — figures reflect the last 28 days</div>
+    <div class="report-row"><span>GA4 Sessions</span><b>${lastData.sessions28.toLocaleString()}</b></div>
+    <div class="report-row"><span>GA4 Users</span><b>${lastData.users28.toLocaleString()}</b></div>
+    <div class="report-row"><span>Search Console CTR</span><b>${lastData.ctr}%</b></div>
+    <div class="report-row"><span>Search Console Clicks</span><b>${lastData.clicks.toLocaleString()}</b></div>
+    <div class="report-row"><span>Search Console Impressions</span><b>${lastData.impressions.toLocaleString()}</b></div>
+    <div class="report-section">Sessions by Month</div>
+    ${monthlyRows}
+    <div class="report-section">Sessions by Channel</div>
+    ${channelRows}
+    <div class="report-section">Top 5 Search Queries</div>
+    ${queryRows}
+    <button class="action" onclick="window.print()">Print / Save as PDF</button>
+  `);
+});
+
 </script>
 </body>
 </html>
