@@ -99,7 +99,7 @@
 
       <!-- OVERVIEW -->
       <div class="section-title">🧭 Overview — At a Glance</div>
-      <div class="kpi-row" style="grid-template-columns:repeat(6,1fr);">
+      <div class="kpi-row" style="grid-template-columns:repeat(6,1fr); margin-bottom:34px;">
         <div class="kpi navy"><div class="val" id="ov-totalLeads">–</div><div class="lbl">Total Leads</div></div>
         <div class="kpi blue"><div class="val" id="ov-sessions">–</div><div class="lbl">Sessions (28d)</div></div>
         <div class="kpi green"><div class="val" id="ov-winRate">–</div><div class="lbl">Lead → Win Rate</div></div>
@@ -108,7 +108,7 @@
         <div class="kpi red"><div class="val" id="ov-ctr">–</div><div class="lbl">SEO CTR</div></div>
       </div>
 
-      <!-- TRAFFIC + ACQUISITION (side by side) -->
+      <!-- TRAFFIC + LEAD GENERATION (side by side) -->
       <div class="split-row">
         <div>
           <div class="section-title">📈 Traffic</div>
@@ -124,12 +124,21 @@
           </div>
         </div>
         <div>
-          <div class="section-title">🔗 Acquisition (sessions by channel, 28d)</div>
-          <div class="card"><canvas id="acqChart" height="110"></canvas></div>
+          <div class="section-title">🎯 Lead Generation (GA4 events, 28d)</div>
+          <div class="kpi-row" style="grid-template-columns:repeat(3,1fr);">
+            <div class="kpi red"><div class="val" id="kpi-ev-form">–</div><div class="lbl">Wix Form Submissions</div></div>
+            <div class="kpi yellow"><div class="val" id="kpi-ev-quote">–</div><div class="lbl">Quote Requests</div></div>
+            <div class="kpi blue"><div class="val" id="kpi-ev-messenger">–</div><div class="lbl">Messenger Clicks</div></div>
+          </div>
+          <div class="card" style="margin-top:14px;">
+            <h3>Lead Events — Daily Trend (28 days)</h3>
+            <canvas id="leadEventsChart" height="110"></canvas>
+          </div>
+          <div class="note" id="lead-event-note"></div>
         </div>
       </div>
 
-      <!-- ENGAGEMENT + LEAD GENERATION (side by side) -->
+      <!-- ENGAGEMENT + ACQUISITION (side by side) -->
       <div class="split-row">
         <div>
           <div class="section-title">⏱ Engagement</div>
@@ -146,17 +155,8 @@
           </div>
         </div>
         <div>
-          <div class="section-title">🎯 Lead Generation (GA4 events, 28d)</div>
-          <div class="kpi-row" style="grid-template-columns:repeat(3,1fr);">
-            <div class="kpi red"><div class="val" id="kpi-ev-form">–</div><div class="lbl">Wix Form Submissions</div></div>
-            <div class="kpi yellow"><div class="val" id="kpi-ev-quote">–</div><div class="lbl">Quote Requests</div></div>
-            <div class="kpi blue"><div class="val" id="kpi-ev-messenger">–</div><div class="lbl">Messenger Clicks</div></div>
-          </div>
-          <div class="card" style="margin-top:14px;">
-            <h3>Lead Events — Daily Trend (28 days)</h3>
-            <canvas id="leadEventsChart" height="110"></canvas>
-          </div>
-          <div class="note" id="lead-event-note"></div>
+          <div class="section-title">🔗 Acquisition (sessions by channel, 28d)</div>
+          <div class="card"><canvas id="acqChart" height="110"></canvas></div>
         </div>
       </div>
 
