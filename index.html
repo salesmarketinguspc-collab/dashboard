@@ -152,23 +152,34 @@
       </div>
 
       <!-- BUSINESS IMPACT -->
-      <div class="section-title">💼 Business Impact (from your CRM — not from Google)</div>
+      <div class="section-title">💼 Business Impact (live from Leads Masterlist)</div>
       <div class="kpi-row">
-        <div class="bi-card"><input type="number" id="bi-mql" value="0" /><div class="lbl">MQLs</div></div>
-        <div class="bi-card"><input type="number" id="bi-sql" value="0" /><div class="lbl">SQLs</div></div>
-        <div class="bi-card"><input type="number" id="bi-proposals" value="0" /><div class="lbl">Proposals Sent</div></div>
-        <div class="bi-card"><input type="number" id="bi-won" value="0" /><div class="lbl">Projects Won</div></div>
+        <div class="kpi navy"><div class="val" id="bi-total">–</div><div class="lbl">Total Leads</div></div>
+        <div class="kpi blue"><div class="val" id="bi-accommodated">–</div><div class="lbl">Leads Accommodated</div></div>
+        <div class="kpi yellow"><div class="val" id="bi-pending">–</div><div class="lbl">Pending / Unaccommodated</div></div>
+        <div class="kpi purple"><div class="val" id="bi-avgdaily">–</div><div class="lbl">Avg Daily Leads</div></div>
       </div>
-      <div class="bi-actions">
-        <button id="bi-import-btn">📥 Import Leads CSV from CRM workbook</button>
-        <input type="file" id="bi-file" accept=".csv" style="display:none;" />
-        <button class="secondary" id="bi-save-btn">💾 Save numbers manually</button>
+      <div class="kpi-row" style="margin-top:14px;">
+        <div class="kpi green"><div class="val" id="bi-mql">–</div><div class="lbl">MQLs (Discovery+Evaluation+Intent)</div></div>
+        <div class="kpi blue"><div class="val" id="bi-sql">–</div><div class="lbl">SQLs (Engineering RFQ = Yes)</div></div>
+        <div class="kpi yellow"><div class="val" id="bi-proposals">–</div><div class="lbl">Proposals Sent</div></div>
+        <div class="kpi green"><div class="val" id="bi-won">–</div><div class="lbl">Projects Won</div></div>
       </div>
-      <div class="note">
-        These four numbers live in your <b>Leads (CRM)</b> Excel workbook, not in Google Analytics — Google has no concept of "qualified lead."
-        Export the <b>2. Leads (CRM)</b> tab as CSV and click <b>Import</b> to auto-count: MQL = reached "Qualified Lead" stage or further;
-        SQL = reached "Proposal Sent" stage or further; Proposals Sent = has a Proposal Sent Date; Projects Won = "Project Won?" = Y.
-        Or just type numbers in directly and click Save — either way they're remembered on this browser for next time.
+      <div class="grid2">
+        <div class="card">
+          <h3>Leads by Stage</h3>
+          <table class="mini" id="tbl-stage"><thead><tr><th>Stage</th><th>Leads</th></tr></thead><tbody></tbody></table>
+        </div>
+        <div class="card">
+          <h3>Leads by Channel (Masterlist)</h3>
+          <table class="mini" id="tbl-leadchannel"><thead><tr><th>Channel</th><th>Leads</th></tr></thead><tbody></tbody></table>
+        </div>
+      </div>
+      <div class="note" id="bi-note">
+        Pulled live from your <b>Client Leads Masterlist</b> Google Sheet, "Dashboard" tab — same cells your existing sheet dashboard uses,
+        so these numbers always match. Losses this period: <b id="bi-losses">–</b>. Mapping: MQL = Discovery/Evaluation/Intent stage leads;
+        SQL = Engineering RFQ Yes; Proposals Sent = Engineering RFQ Yes (same count, since your sheet doesn't separately track proposal-send date);
+        Projects Won = your sheet's "Wins" cell.
       </div>
     </div>
   </div>
@@ -186,6 +197,8 @@ const CONFIG = {
   CLIENT_ID: "904304524183-od6fmci8ub6d89p8mvon4q70p1tfu1tl.apps.googleusercontent.com",
   GA4_PROPERTY_ID: "538474808",
   GSC_SITE_URL: "https://www.siegenphilippines.com/",
+  SHEET_ID: "1i4PrGZymp8nL5K13kChfjvvy5IfJCOyHp3e9aQAsQHQ",
+  SHEET_TAB: "Dashboard",
   // Edit these to match your actual GTM/GA4 event names once you confirm them in GA4 > Admin > Events
   EVENTS: {
     form: "form_submit",
@@ -196,7 +209,7 @@ const CONFIG = {
 };
 /* ========================================================= */
 
-const SCOPES = "https://www.googleapis.com/auth/analytics.readonly https://www.googleapis.com/auth/webmasters.readonly";
+const SCOPES = "https://www.googleapis.com/auth/analytics.readonly https://www.googleapis.com/auth/webmasters.readonly https://www.googleapis.com/auth/spreadsheets.readonly";
 let accessToken = null, tokenClient = null, charts = {}, lastData = null;
 
 if (CONFIG.CLIENT_ID.startsWith("YOUR_")) document.getElementById('config-banner').style.display = 'block';
@@ -220,7 +233,6 @@ window.onload = () => {
       loadAll();
     }
   });
-  loadBusinessImpact();
 };
 
 document.getElementById('signin-btn').addEventListener('click', () => {
@@ -241,6 +253,14 @@ async function gscQuery(body) {
     method: "POST", headers: { "Authorization": "Bearer " + accessToken, "Content-Type": "application/json" }, body: JSON.stringify(body)
   });
   if (!res.ok) throw new Error("Search Console API error: " + res.status + " " + await res.text());
+  return res.json();
+}
+async function sheetsBatchGet(ranges) {
+  const params = ranges.map(r => "ranges=" + encodeURIComponent(r)).join("&");
+  const res = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${CONFIG.SHEET_ID}/values:batchGet?${params}`, {
+    headers: { "Authorization": "Bearer " + accessToken }
+  });
+  if (!res.ok) throw new Error("Sheets API error: " + res.status + " " + await res.text());
   return res.json();
 }
 function fmtDate(d) { return d.toISOString().slice(0,10); }
@@ -342,12 +362,23 @@ async function loadAll() {
     const pageRows = (gscPages.rows || []);
     fillTable('tbl-gsc-pages', pageRows.map(r => [r.keys[0].replace(CONFIG.GSC_SITE_URL, "/"), r.clicks, r.position.toFixed(1)]));
 
+    // Business Impact (live from Leads Masterlist Google Sheet)
+    let bi = { totalLeads:0, accommodated:0, pending:0, avgDaily:0, wins:0, losses:0, rfqSent:0, mql:0 };
+    try {
+      bi = await loadBusinessImpact();
+    } catch (biErr) {
+      console.error("Business Impact sheet error:", biErr);
+      document.getElementById('bi-note').insertAdjacentHTML('beforebegin',
+        '<div class="note" style="background:#fce4d6;border-color:#f0b78a;color:#7a3b00;">Couldn\'t load the Leads Masterlist sheet — check that CONFIG.SHEET_ID is correct, the Sheets API is enabled, and salesmarketing.uspc@gmail.com has at least Viewer access to that sheet.</div>');
+    }
+
     lastData = {
       generatedAt: today, totalUsers, newUsers, sessions28, engRate: (engRate*100).toFixed(1), avgEngTime: fmtSecs(avgEngTime),
       acquisition: buckets, landingPages: (landing.rows||[]).map(r=>({page:r.dimensionValues[0].value, sessions:Number(r.metricValues[0].value)})),
       events: evCounts, gscCtr: ctr, gscPos: pos, gscClicks: gRow?gRow.clicks:0, gscImpr: gRow?gRow.impressions:0,
       keywords: queryRows.map(r=>({query:r.keys[0], clicks:r.clicks, impressions:r.impressions, ctr:(r.ctr*100).toFixed(1), position:r.position.toFixed(1)})),
-      monthly: months.map((m,i)=>({month:m, sessions:sessionsArr[i]}))
+      monthly: months.map((m,i)=>({month:m, sessions:sessionsArr[i]})),
+      bi
     };
 
   } catch (err) {
@@ -381,89 +412,46 @@ function renderBars(canvasId, labels, data, label, horizontal) {
   });
 }
 
-/* ---------- Business Impact: manual + CSV import, persisted locally ---------- */
-const BI_KEY = "siegenBusinessImpact";
-function loadBusinessImpact() {
-  try {
-    const saved = JSON.parse(localStorage.getItem(BI_KEY) || "{}");
-    document.getElementById('bi-mql').value = saved.mql || 0;
-    document.getElementById('bi-sql').value = saved.sql || 0;
-    document.getElementById('bi-proposals').value = saved.proposals || 0;
-    document.getElementById('bi-won').value = saved.won || 0;
-  } catch(e) {}
-}
-document.getElementById('bi-save-btn').addEventListener('click', () => {
-  const data = {
-    mql: Number(document.getElementById('bi-mql').value) || 0,
-    sql: Number(document.getElementById('bi-sql').value) || 0,
-    proposals: Number(document.getElementById('bi-proposals').value) || 0,
-    won: Number(document.getElementById('bi-won').value) || 0
-  };
-  localStorage.setItem(BI_KEY, JSON.stringify(data));
-  alert("Saved. These numbers will be remembered on this browser next time you open the dashboard.");
-});
+/* ---------- Business Impact: live from Google Sheet ---------- */
+async function loadBusinessImpact() {
+  const ranges = [
+    `${CONFIG.SHEET_TAB}!C5`, `${CONFIG.SHEET_TAB}!F5`, `${CONFIG.SHEET_TAB}!I5`,
+    `${CONFIG.SHEET_TAB}!A9`, `${CONFIG.SHEET_TAB}!C9`, `${CONFIG.SHEET_TAB}!F9`, `${CONFIG.SHEET_TAB}!I9`,
+    `${CONFIG.SHEET_TAB}!A14:B22`, `${CONFIG.SHEET_TAB}!A26:B29`
+  ];
+  const res = await sheetsBatchGet(ranges);
+  const vr = res.valueRanges;
+  const val = (i) => { try { return vr[i].values[0][0]; } catch(e) { return null; } };
+  const grid = (i) => { try { return vr[i].values; } catch(e) { return []; } };
 
-document.getElementById('bi-import-btn').addEventListener('click', () => document.getElementById('bi-file').click());
-document.getElementById('bi-file').addEventListener('change', (e) => {
-  const file = e.target.files[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = (ev) => {
-    try {
-      const rows = parseCSV(ev.target.result);
-      const headerIdx = rows.findIndex(r => r.includes("Stage"));
-      if (headerIdx === -1) { alert("Couldn't find a 'Stage' column — make sure you exported the '2. Leads (CRM)' tab including its header row."); return; }
-      const headers = rows[headerIdx];
-      const stageCol = headers.indexOf("Stage");
-      const proposalDateCol = headers.indexOf("Proposal Sent Date");
-      const wonCol = headers.indexOf("Project Won? (Y/N)");
-      const dataRows = rows.slice(headerIdx + 1).filter(r => r.some(c => c && c.trim() !== ""));
+  const totalLeads = Number(val(0)) || 0;
+  const accommodated = Number(val(1)) || 0;
+  const pending = Number(val(2)) || 0;
+  const avgDaily = val(3) || 0;
+  const wins = Number(val(4)) || 0;
+  const losses = Number(val(5)) || 0;
+  const rfqSent = Number(val(6)) || 0;
+  const channelRows = grid(7); // A14:B22 -> [Channel, Leads]
+  const stageRows = grid(8);   // A26:B29 -> [Stage, Leads]
 
-      let mql = 0, sql = 0, proposals = 0, won = 0;
-      const mqlStages = ["Qualified Lead","Proposal Sent","Negotiation","Won"];
-      const sqlStages = ["Proposal Sent","Negotiation","Won"];
-      dataRows.forEach(r => {
-        const stage = (r[stageCol] || "").trim();
-        if (mqlStages.includes(stage)) mql++;
-        if (sqlStages.includes(stage)) sql++;
-        if (proposalDateCol > -1 && r[proposalDateCol] && r[proposalDateCol].trim() !== "") proposals++;
-        if (wonCol > -1 && (r[wonCol] || "").trim().toUpperCase() === "Y") won++;
-      });
-      document.getElementById('bi-mql').value = mql;
-      document.getElementById('bi-sql').value = sql;
-      document.getElementById('bi-proposals').value = proposals;
-      document.getElementById('bi-won').value = won;
-      localStorage.setItem(BI_KEY, JSON.stringify({ mql, sql, proposals, won }));
-      alert(`Imported ${dataRows.length} lead rows.\nMQLs: ${mql}\nSQLs: ${sql}\nProposals Sent: ${proposals}\nProjects Won: ${won}`);
-    } catch (err) {
-      console.error(err);
-      alert("Couldn't parse that CSV. Make sure it's a plain CSV export of the Leads tab.");
-    }
-  };
-  reader.readAsText(file);
-  e.target.value = "";
-});
+  const mql = stageRows
+    .filter(r => ["Discovery","Evaluation","Intent"].includes((r[0]||"").trim()))
+    .reduce((sum, r) => sum + (Number(r[1]) || 0), 0);
 
-function parseCSV(text) {
-  const rows = [];
-  let row = [], field = "", inQuotes = false;
-  for (let i = 0; i < text.length; i++) {
-    const c = text[i], next = text[i+1];
-    if (inQuotes) {
-      if (c === '"' && next === '"') { field += '"'; i++; }
-      else if (c === '"') { inQuotes = false; }
-      else { field += c; }
-    } else {
-      if (c === '"') inQuotes = true;
-      else if (c === ',') { row.push(field); field = ""; }
-      else if (c === '\n' || c === '\r') {
-        if (c === '\r' && next === '\n') i++;
-        row.push(field); rows.push(row); row = []; field = "";
-      } else field += c;
-    }
-  }
-  if (field !== "" || row.length) { row.push(field); rows.push(row); }
-  return rows;
+  document.getElementById('bi-total').textContent = totalLeads.toLocaleString();
+  document.getElementById('bi-accommodated').textContent = accommodated.toLocaleString();
+  document.getElementById('bi-pending').textContent = pending.toLocaleString();
+  document.getElementById('bi-avgdaily').textContent = avgDaily;
+  document.getElementById('bi-mql').textContent = mql.toLocaleString();
+  document.getElementById('bi-sql').textContent = rfqSent.toLocaleString();
+  document.getElementById('bi-proposals').textContent = rfqSent.toLocaleString();
+  document.getElementById('bi-won').textContent = wins.toLocaleString();
+  document.getElementById('bi-losses').textContent = losses.toLocaleString();
+
+  fillTable('tbl-stage', stageRows.map(r => [r[0], Number(r[1]||0).toLocaleString()]));
+  fillTable('tbl-leadchannel', channelRows.map(r => [r[0], Number(r[1]||0).toLocaleString()]));
+
+  return { totalLeads, accommodated, pending, avgDaily, wins, losses, rfqSent, mql, stageRows, channelRows };
 }
 
 /* ---------- Sidebar nav actions ---------- */
@@ -474,14 +462,15 @@ modalOverlay.addEventListener('click', (e) => { if (e.target === modalOverlay) m
 function openModal(html) { modalBody.innerHTML = html; modalOverlay.classList.add('show'); }
 
 document.getElementById('nav-leads').addEventListener('click', () => {
-  openModal(`<h2>Leads (CRM)</h2><div class="sub">Not part of this live dashboard</div>
-    <p style="font-size:14px;line-height:1.6;">Tracked in the <b>Siegen Marketing Lead Dashboard.xlsx</b> workbook. Export its
-    <b>2. Leads (CRM)</b> tab as CSV and use the Business Impact section's Import button to pull MQL/SQL/Proposals/Won numbers in here.</p>`);
+  openModal(`<h2>Leads (CRM)</h2><div class="sub">Now connected live</div>
+    <p style="font-size:14px;line-height:1.6;">Your <b>Client Leads Masterlist</b> Google Sheet feeds the Business Impact section
+    directly (Total Leads, Wins, Losses, MQLs, SQLs, Proposals Sent, Leads by Stage/Channel). To see or edit the raw lead rows
+    themselves, open the sheet directly in Google Sheets.</p>`);
 });
 
 document.getElementById('nav-export').addEventListener('click', () => {
   if (!lastData) { alert("Sign in and let the dashboard load data first, then Export."); return; }
-  const bi = JSON.parse(localStorage.getItem(BI_KEY) || "{}");
+  const bi = lastData.bi || {};
   const lines = [];
   lines.push("Siegen Executive Marketing Dashboard Export");
   lines.push("Generated," + lastData.generatedAt.toISOString());
@@ -508,11 +497,16 @@ document.getElementById('nav-export').addEventListener('click', () => {
   lines.push("Query,Clicks,Impressions,CTR,Position");
   lastData.keywords.forEach(q => lines.push(`"${q.query.replace(/"/g,'""')}",${q.clicks},${q.impressions},${q.ctr}%,${q.position}`));
   lines.push("");
-  lines.push("BUSINESS IMPACT (from CRM)");
+  lines.push("BUSINESS IMPACT (from Leads Masterlist sheet)");
+  lines.push(`Total Leads,${bi.totalLeads||0}`);
+  lines.push(`Leads Accommodated,${bi.accommodated||0}`);
+  lines.push(`Pending/Unaccommodated,${bi.pending||0}`);
+  lines.push(`Avg Daily Leads,${bi.avgDaily||0}`);
   lines.push(`MQLs,${bi.mql||0}`);
-  lines.push(`SQLs,${bi.sql||0}`);
-  lines.push(`Proposals Sent,${bi.proposals||0}`);
-  lines.push(`Projects Won,${bi.won||0}`);
+  lines.push(`SQLs,${bi.rfqSent||0}`);
+  lines.push(`Proposals Sent,${bi.rfqSent||0}`);
+  lines.push(`Projects Won,${bi.wins||0}`);
+  lines.push(`Losses,${bi.losses||0}`);
 
   const blob = new Blob([lines.join("\n")], { type: "text/csv" });
   const url = URL.createObjectURL(blob);
@@ -523,9 +517,9 @@ document.getElementById('nav-export').addEventListener('click', () => {
 
 document.getElementById('nav-weekly').addEventListener('click', () => {
   if (!lastData) { alert("Sign in and let the dashboard load data first, then open the Weekly Report."); return; }
-  const bi = JSON.parse(localStorage.getItem(BI_KEY) || "{}");
   const acqRows = Object.entries(lastData.acquisition).map(([k,v]) => `<div class="report-row"><span>${k}</span><b>${v.toLocaleString()}</b></div>`).join("");
   const kwRows = lastData.keywords.slice(0,5).map(q => `<div class="report-row"><span>${q.query}</span><b>${q.clicks} clicks</b></div>`).join("");
+  const bi = lastData.bi || {};
   openModal(`
     <h2>Weekly Executive Report</h2>
     <div class="sub">Generated ${lastData.generatedAt.toLocaleString()} — figures reflect the last 28 days</div>
@@ -543,11 +537,12 @@ document.getElementById('nav-weekly').addEventListener('click', () => {
     <div class="report-row"><span>Average Position</span><b>${lastData.gscPos}</b></div>
     <div class="report-section">Top Keywords</div>
     ${kwRows}
-    <div class="report-section">Business Impact</div>
-    <div class="report-row"><span>MQLs</span><b>${bi.mql||0}</b></div>
-    <div class="report-row"><span>SQLs</span><b>${bi.sql||0}</b></div>
-    <div class="report-row"><span>Proposals Sent</span><b>${bi.proposals||0}</b></div>
-    <div class="report-row"><span>Projects Won</span><b>${bi.won||0}</b></div>
+    <div class="report-section">Business Impact (Leads Masterlist)</div>
+    <div class="report-row"><span>Total Leads</span><b>${(bi.totalLeads||0).toLocaleString()}</b></div>
+    <div class="report-row"><span>MQLs</span><b>${(bi.mql||0).toLocaleString()}</b></div>
+    <div class="report-row"><span>SQLs</span><b>${(bi.rfqSent||0).toLocaleString()}</b></div>
+    <div class="report-row"><span>Proposals Sent</span><b>${(bi.rfqSent||0).toLocaleString()}</b></div>
+    <div class="report-row"><span>Projects Won</span><b>${(bi.wins||0).toLocaleString()}</b></div>
     <button class="action" onclick="window.print()">Print / Save as PDF</button>
   `);
 });
