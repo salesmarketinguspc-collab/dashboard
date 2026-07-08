@@ -3,68 +3,74 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Siegen Marketing Live Dashboard</title>
+<title>Siegen Marketing Executive Dashboard</title>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
 <style>
   :root{
     --navy:#12233d; --navy-2:#1a3252; --bg:#eef1f4; --card:#ffffff;
-    --green:#3bb54a; --red:#e6483a; --blue:#3c8ce0; --yellow:#f2b705;
+    --green:#3bb54a; --red:#e6483a; --blue:#3c8ce0; --yellow:#f2b705; --purple:#8e6ee6;
     --text:#1c2b3a; --muted:#7a8896; --border:#e3e8ee;
   }
   *{box-sizing:border-box;}
   body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;background:var(--bg);color:var(--text);overflow-x:hidden;}
-  .app{display:flex;min-height:100vh;width:100%;}
-  /* Sidebar */
-  .sidebar{width:230px;background:var(--navy);color:#cfd8e3;flex-shrink:0;}
+  .app{display:flex;min-height:100vh;width:100%;max-width:100vw;}
+  .sidebar{width:220px;background:var(--navy);color:#cfd8e3;flex-shrink:0;}
   .brand{padding:20px 20px;font-weight:700;font-size:18px;color:#fff;border-bottom:1px solid rgba(255,255,255,.08);}
   .brand span{color:#4fa3e3;}
-  .nav-item{padding:13px 20px;font-size:14px;cursor:default;border-left:3px solid transparent;}
+  .nav-item{padding:12px 20px;font-size:13px;cursor:default;border-left:3px solid transparent;}
   .nav-item.active{background:var(--navy-2);border-left:3px solid #4fa3e3;color:#fff;}
-  /* Main */
   .main{flex:1;display:flex;flex-direction:column;min-width:0;max-width:100%;}
   .topbar{background:var(--navy);color:#fff;padding:12px 24px;display:flex;justify-content:space-between;align-items:center;font-size:14px;flex-wrap:wrap;gap:8px;}
-  .topbar .status{display:flex;align-items:center;gap:10px;}
+  .topbar .status{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
   .dot{width:8px;height:8px;border-radius:50%;background:#3bb54a;}
   .dot.off{background:#e6483a;}
-  #signin-btn{margin-left:12px;}
-  .content{padding:22px 26px;}
-  .kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:18px;}
-  .kpi{border-radius:6px;padding:18px 20px;color:#fff;position:relative;overflow:hidden;min-height:76px;}
-  .kpi .val{font-size:26px;font-weight:700;line-height:1.1;}
-  .kpi .lbl{font-size:12px;opacity:.9;margin-top:4px;}
-  .kpi .icon{position:absolute;right:16px;top:16px;font-size:20px;}
-  .kpi.green{background:var(--green);}
-  .kpi.red{background:var(--red);}
-  .kpi.blue{background:var(--blue);}
-  .kpi.yellow{background:var(--yellow);color:#3a2e00;}
-  .grid2{display:grid;grid-template-columns:1fr 2fr;gap:16px;margin-bottom:16px;}
+  button{font-family:inherit;cursor:pointer;}
+  .content{padding:22px 26px;overflow-x:hidden;}
+  .section-title{font-size:15px;font-weight:700;color:var(--navy);margin:26px 0 12px;padding-bottom:6px;border-bottom:2px solid var(--navy);display:flex;align-items:center;gap:8px;}
+  .section-title:first-child{margin-top:0;}
+  .kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;}
+  .kpi-row.five{grid-template-columns:repeat(5,1fr);}
+  .kpi{border-radius:6px;padding:16px 18px;color:#fff;position:relative;overflow:hidden;min-height:66px;}
+  .kpi .val{font-size:23px;font-weight:700;line-height:1.1;}
+  .kpi .lbl{font-size:11.5px;opacity:.92;margin-top:4px;}
+  .kpi.green{background:var(--green);} .kpi.red{background:var(--red);}
+  .kpi.blue{background:var(--blue);} .kpi.yellow{background:var(--yellow);color:#3a2e00;}
+  .kpi.purple{background:var(--purple);} .kpi.navy{background:var(--navy);}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:14px;}
   .card{background:var(--card);border:1px solid var(--border);border-radius:6px;padding:16px;}
-  .card h3{margin:0 0 12px;font-size:13px;color:var(--muted);text-transform:uppercase;letter-spacing:.03em;font-weight:600;}
-  .bottom-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+  .card h3{margin:0 0 12px;font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.03em;font-weight:600;}
   canvas{max-width:100%;}
-  .placeholder{color:var(--muted);font-size:13px;text-align:center;padding:40px 10px;}
+  table.mini{width:100%;border-collapse:collapse;font-size:13px;}
+  table.mini th{text-align:left;color:var(--muted);font-weight:600;font-size:11px;text-transform:uppercase;padding:4px 6px;border-bottom:1px solid var(--border);}
+  table.mini td{padding:6px 6px;border-bottom:1px solid var(--border);}
+  table.mini tr:last-child td{border-bottom:none;}
+  .note{background:#eef4fb;border:1px solid #cfe2f5;color:#294a68;padding:10px 14px;border-radius:6px;font-size:12.5px;margin-top:10px;line-height:1.5;}
   .config-banner{background:#fff3cd;border:1px solid #ffe08a;color:#5c4300;padding:10px 16px;font-size:13px;border-radius:6px;margin-bottom:16px;display:none;}
-  .content{overflow-x:hidden;}
-  .app{max-width:100vw;}
+  .bi-card{background:var(--card);border:1px solid var(--border);border-radius:6px;padding:16px;text-align:center;}
+  .bi-card .val{font-size:30px;font-weight:700;color:var(--navy);}
+  .bi-card .lbl{font-size:12px;color:var(--muted);margin-top:4px;}
+  .bi-card input{width:70px;font-size:20px;font-weight:700;color:var(--navy);border:1px solid var(--border);border-radius:4px;text-align:center;padding:4px;}
+  .bi-actions{display:flex;gap:10px;margin-top:14px;flex-wrap:wrap;}
+  .bi-actions button{background:var(--navy);color:#fff;border:none;padding:8px 14px;border-radius:5px;font-size:12.5px;}
+  .bi-actions button.secondary{background:#fff;color:var(--navy);border:1px solid var(--navy);}
   .modal-overlay{display:none;position:fixed;inset:0;background:rgba(18,35,61,.55);z-index:50;align-items:center;justify-content:center;}
   .modal-overlay.show{display:flex;}
-  .modal-box{background:#fff;border-radius:8px;max-width:520px;width:92%;max-height:82vh;overflow-y:auto;padding:26px 28px;position:relative;box-shadow:0 20px 50px rgba(0,0,0,.3);}
-  .modal-close{position:absolute;top:12px;right:14px;background:none;border:none;font-size:22px;color:var(--muted);cursor:pointer;line-height:1;}
+  .modal-box{background:#fff;border-radius:8px;max-width:560px;width:92%;max-height:85vh;overflow-y:auto;padding:26px 28px;position:relative;box-shadow:0 20px 50px rgba(0,0,0,.3);}
+  .modal-close{position:absolute;top:12px;right:14px;background:none;border:none;font-size:22px;color:var(--muted);}
   .modal-box h2{margin:0 0 4px;font-size:18px;color:var(--navy);}
   .modal-box .sub{color:var(--muted);font-size:12px;margin-bottom:16px;}
-  .report-row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);font-size:14px;}
+  .report-row{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--border);font-size:13.5px;}
   .report-row b{color:var(--navy);}
-  .report-section{margin-top:18px;font-size:12px;text-transform:uppercase;letter-spacing:.03em;color:var(--muted);font-weight:600;}
-  .modal-box ul{padding-left:18px;font-size:14px;line-height:1.6;}
-  .modal-box button.action{margin-top:18px;background:var(--navy);color:#fff;border:none;padding:9px 16px;border-radius:5px;cursor:pointer;font-size:13px;}
+  .report-section{margin-top:16px;font-size:11.5px;text-transform:uppercase;letter-spacing:.03em;color:var(--muted);font-weight:700;}
+  .modal-box button.action{margin-top:18px;background:var(--navy);color:#fff;border:none;padding:9px 16px;border-radius:5px;font-size:13px;}
 </style>
 </head>
 <body>
 <div class="app">
   <div class="sidebar">
     <div class="brand">Siegen<span>Marketing</span></div>
-    <div class="nav-item active">📈 Live Dashboard</div>
+    <div class="nav-item active">📊 Executive Dashboard</div>
     <div class="nav-item" id="nav-leads" style="cursor:pointer;">🗂 Leads (see CRM file)</div>
     <div class="nav-item" id="nav-weekly" style="cursor:pointer;">📅 Weekly Report</div>
     <div class="nav-item" id="nav-export" style="cursor:pointer;">📤 Export</div>
@@ -72,7 +78,7 @@
 
   <div class="main">
     <div class="topbar">
-      <div>United Siegen Philippines — Marketing Performance</div>
+      <div>United Siegen Philippines — Executive Marketing Dashboard</div>
       <div class="status">
         <span class="dot off" id="conn-dot"></span>
         <span id="conn-text">Not connected</span>
@@ -81,63 +87,124 @@
     </div>
 
     <div class="content">
-      <div class="config-banner" id="config-banner">
-        ⚠️ Fill in CLIENT_ID, GA4_PROPERTY_ID and GSC_SITE_URL at the top of the script before this will work. See comments in the file.
-      </div>
+      <div class="config-banner" id="config-banner">⚠️ CLIENT_ID / GA4_PROPERTY_ID / GSC_SITE_URL missing in CONFIG — see script comments.</div>
 
+      <!-- TRAFFIC -->
+      <div class="section-title">📈 Traffic</div>
       <div class="kpi-row">
-        <div class="kpi green"><div class="icon">▲</div><div class="val" id="kpi-sessions">–</div><div class="lbl">GA4 Sessions (28 days)</div></div>
-        <div class="kpi red"><div class="icon">▼</div><div class="val" id="kpi-ctr">–</div><div class="lbl">Search Console CTR</div></div>
-        <div class="kpi blue"><div class="icon">✔</div><div class="val" id="kpi-users">–</div><div class="lbl">GA4 Users (28 days)</div></div>
-        <div class="kpi yellow"><div class="icon">⚠</div><div class="val" id="kpi-updated">–</div><div class="lbl">Last Updated</div></div>
+        <div class="kpi green"><div class="val" id="kpi-totalUsers">–</div><div class="lbl">Total Users (28d)</div></div>
+        <div class="kpi blue"><div class="val" id="kpi-newUsers">–</div><div class="lbl">New Users (28d)</div></div>
+        <div class="kpi navy"><div class="val" id="kpi-sessions">–</div><div class="lbl">Sessions (28d)</div></div>
+        <div class="kpi purple"><div class="val" id="kpi-engRate">–</div><div class="lbl">Engagement Rate</div></div>
       </div>
-
-      <div class="card" style="margin-bottom:16px;">
+      <div class="card" style="margin-top:14px;">
         <h3>Monthly Sessions + Trend</h3>
-        <canvas id="sessionsChart" height="90"></canvas>
+        <canvas id="sessionsChart" height="85"></canvas>
       </div>
 
-      <div class="bottom-row">
+      <!-- ACQUISITION -->
+      <div class="section-title">🔗 Acquisition (sessions by channel, 28d)</div>
+      <div class="card"><canvas id="acqChart" height="90"></canvas></div>
+
+      <!-- ENGAGEMENT -->
+      <div class="section-title">⏱ Engagement</div>
+      <div class="grid2">
         <div class="card">
-          <h3>Top Search Queries (Clicks)</h3>
-          <canvas id="queriesChart" height="180"></canvas>
+          <h3>Average Engagement Time</h3>
+          <div class="bi-card" style="border:none;padding:6px;">
+            <div class="val" id="kpi-avgEngTime">–</div>
+            <div class="lbl">per session (28 days)</div>
+          </div>
         </div>
         <div class="card">
-          <h3>Sessions by Channel</h3>
-          <canvas id="channelChart" height="180"></canvas>
+          <h3>Top Landing Pages (GA4, by Sessions)</h3>
+          <table class="mini" id="tbl-landing"><thead><tr><th>Page</th><th>Sessions</th></tr></thead><tbody></tbody></table>
         </div>
+      </div>
+
+      <!-- LEAD GENERATION -->
+      <div class="section-title">🎯 Lead Generation (GA4 events, 28d)</div>
+      <div class="kpi-row">
+        <div class="kpi red"><div class="val" id="kpi-ev-form">–</div><div class="lbl">Contact Form Submissions</div></div>
+        <div class="kpi yellow"><div class="val" id="kpi-ev-quote">–</div><div class="lbl">Quote Requests</div></div>
+        <div class="kpi blue"><div class="val" id="kpi-ev-messenger">–</div><div class="lbl">Messenger Clicks</div></div>
+        <div class="kpi green"><div class="val" id="kpi-ev-phone">–</div><div class="lbl">Phone Clicks</div></div>
+      </div>
+      <div class="note" id="lead-event-note"></div>
+
+      <!-- SEO -->
+      <div class="section-title">🔍 SEO (Search Console, 28d)</div>
+      <div class="kpi-row">
+        <div class="kpi red"><div class="val" id="kpi-gsc-ctr">–</div><div class="lbl">CTR</div></div>
+        <div class="kpi navy"><div class="val" id="kpi-gsc-pos">–</div><div class="lbl">Average Position</div></div>
+        <div class="kpi green"><div class="val" id="kpi-gsc-clicks">–</div><div class="lbl">Total Clicks</div></div>
+        <div class="kpi blue"><div class="val" id="kpi-gsc-impr">–</div><div class="lbl">Total Impressions</div></div>
+      </div>
+      <div class="grid2">
+        <div class="card">
+          <h3>Top Keywords</h3>
+          <table class="mini" id="tbl-keywords"><thead><tr><th>Query</th><th>Clicks</th><th>Impr.</th><th>CTR</th><th>Pos.</th></tr></thead><tbody></tbody></table>
+        </div>
+        <div class="card">
+          <h3>Top Landing Pages (Search Console)</h3>
+          <table class="mini" id="tbl-gsc-pages"><thead><tr><th>Page</th><th>Clicks</th><th>Pos.</th></tr></thead><tbody></tbody></table>
+        </div>
+      </div>
+
+      <!-- BUSINESS IMPACT -->
+      <div class="section-title">💼 Business Impact (from your CRM — not from Google)</div>
+      <div class="kpi-row">
+        <div class="bi-card"><input type="number" id="bi-mql" value="0" /><div class="lbl">MQLs</div></div>
+        <div class="bi-card"><input type="number" id="bi-sql" value="0" /><div class="lbl">SQLs</div></div>
+        <div class="bi-card"><input type="number" id="bi-proposals" value="0" /><div class="lbl">Proposals Sent</div></div>
+        <div class="bi-card"><input type="number" id="bi-won" value="0" /><div class="lbl">Projects Won</div></div>
+      </div>
+      <div class="bi-actions">
+        <button id="bi-import-btn">📥 Import Leads CSV from CRM workbook</button>
+        <input type="file" id="bi-file" accept=".csv" style="display:none;" />
+        <button class="secondary" id="bi-save-btn">💾 Save numbers manually</button>
+      </div>
+      <div class="note">
+        These four numbers live in your <b>Leads (CRM)</b> Excel workbook, not in Google Analytics — Google has no concept of "qualified lead."
+        Export the <b>2. Leads (CRM)</b> tab as CSV and click <b>Import</b> to auto-count: MQL = reached "Qualified Lead" stage or further;
+        SQL = reached "Proposal Sent" stage or further; Proposals Sent = has a Proposal Sent Date; Projects Won = "Project Won?" = Y.
+        Or just type numbers in directly and click Save — either way they're remembered on this browser for next time.
       </div>
     </div>
   </div>
 </div>
 
 <div class="modal-overlay" id="modal-overlay">
-  <div class="modal-box">
-    <button class="modal-close" id="modal-close">&times;</button>
-    <div id="modal-body"></div>
-  </div>
+  <div class="modal-box"><button class="modal-close" id="modal-close">&times;</button><div id="modal-body"></div></div>
 </div>
 
 <script>
 /* =========================================================
-   FILL THESE THREE VALUES IN, THEN SAVE + PUSH TO GITHUB
+   FILL THESE IN, THEN SAVE + PUSH TO GITHUB
    ========================================================= */
 const CONFIG = {
   CLIENT_ID: "904304524183-od6fmci8ub6d89p8mvon4q70p1tfu1tl.apps.googleusercontent.com",
   GA4_PROPERTY_ID: "538474808",
-  GSC_SITE_URL: "https://www.siegenphilippines.com/"
+  GSC_SITE_URL: "https://www.siegenphilippines.com/",
+  // Edit these to match your actual GTM/GA4 event names once you confirm them in GA4 > Admin > Events
+  EVENTS: {
+    form: "form_submit",
+    quote: "generate_lead",
+    messenger: "messenger_click",
+    phone: "phone_click"
+  }
 };
 /* ========================================================= */
 
 const SCOPES = "https://www.googleapis.com/auth/analytics.readonly https://www.googleapis.com/auth/webmasters.readonly";
-let accessToken = null;
-let tokenClient = null;
-let charts = {};
-let lastData = null; // populated after a successful loadAll()
+let accessToken = null, tokenClient = null, charts = {}, lastData = null;
 
-if (CONFIG.CLIENT_ID.startsWith("YOUR_")) {
-  document.getElementById('config-banner').style.display = 'block';
-}
+if (CONFIG.CLIENT_ID.startsWith("YOUR_")) document.getElementById('config-banner').style.display = 'block';
+
+document.getElementById('lead-event-note').innerHTML =
+  `Looking for GA4 events named: <b>${CONFIG.EVENTS.form}</b> (form), <b>${CONFIG.EVENTS.quote}</b> (quote), ` +
+  `<b>${CONFIG.EVENTS.messenger}</b> (Messenger), <b>${CONFIG.EVENTS.phone}</b> (phone). ` +
+  `If these show 0 but you know people are submitting forms/clicking, check GA4 → Admin → Events for the real event names and edit CONFIG.EVENTS at the top of this file to match.`;
 
 window.onload = () => {
   if (!window.google || CONFIG.CLIENT_ID.startsWith("YOUR_")) return;
@@ -153,6 +220,7 @@ window.onload = () => {
       loadAll();
     }
   });
+  loadBusinessImpact();
 };
 
 document.getElementById('signin-btn').addEventListener('click', () => {
@@ -162,136 +230,240 @@ document.getElementById('signin-btn').addEventListener('click', () => {
 
 async function ga4Report(body) {
   const res = await fetch(`https://analyticsdata.googleapis.com/v1beta/properties/${CONFIG.GA4_PROPERTY_ID}:runReport`, {
-    method: "POST",
-    headers: { "Authorization": "Bearer " + accessToken, "Content-Type": "application/json" },
-    body: JSON.stringify(body)
+    method: "POST", headers: { "Authorization": "Bearer " + accessToken, "Content-Type": "application/json" }, body: JSON.stringify(body)
   });
   if (!res.ok) throw new Error("GA4 API error: " + res.status + " " + await res.text());
   return res.json();
 }
-
 async function gscQuery(body) {
   const site = encodeURIComponent(CONFIG.GSC_SITE_URL);
   const res = await fetch(`https://www.googleapis.com/webmasters/v3/sites/${site}/searchAnalytics/query`, {
-    method: "POST",
-    headers: { "Authorization": "Bearer " + accessToken, "Content-Type": "application/json" },
-    body: JSON.stringify(body)
+    method: "POST", headers: { "Authorization": "Bearer " + accessToken, "Content-Type": "application/json" }, body: JSON.stringify(body)
   });
   if (!res.ok) throw new Error("Search Console API error: " + res.status + " " + await res.text());
   return res.json();
 }
-
 function fmtDate(d) { return d.toISOString().slice(0,10); }
+function fmtSecs(s) { s = Math.round(s); return `${Math.floor(s/60)}m ${s%60}s`; }
+
+function bucketChannel(name) {
+  const n = (name || "").toLowerCase();
+  if (n.includes("organic search")) return "Organic Search";
+  if (n === "direct") return "Direct";
+  if (n.includes("social")) return n.includes("paid") ? "Paid" : "Social";
+  if (n.includes("paid") || n.includes("display")) return "Paid";
+  if (n.includes("referral")) return "Referral";
+  return "Other";
+}
 
 async function loadAll() {
   if (typeof Chart === "undefined") {
-    alert("The charting library (Chart.js) didn't load — this is usually an ad blocker or privacy extension blocking the CDN. Try disabling it for this site, or open in a private/incognito window, then click Refresh data again.");
+    alert("Chart.js failed to load — likely an ad blocker. Disable it for this site or try incognito, then Refresh data.");
     return;
   }
   const today = new Date();
   const start28 = new Date(today); start28.setDate(today.getDate() - 28);
   const start12mo = new Date(today); start12mo.setMonth(today.getMonth() - 11);
+  const r28 = { startDate: fmtDate(start28), endDate: fmtDate(today) };
 
   try {
-    // KPI: sessions + users, last 28 days
+    // TRAFFIC + ENGAGEMENT totals
     const totals = await ga4Report({
-      dateRanges: [{ startDate: fmtDate(start28), endDate: fmtDate(today) }],
-      metrics: [{ name: "sessions" }, { name: "activeUsers" }]
+      dateRanges: [r28],
+      metrics: [{ name: "totalUsers" }, { name: "newUsers" }, { name: "sessions" }, { name: "engagementRate" }, { name: "averageSessionDuration" }]
     });
-    const row = totals.rows && totals.rows[0];
-    document.getElementById('kpi-sessions').textContent = row ? Number(row.metricValues[0].value).toLocaleString() : "0";
-    document.getElementById('kpi-users').textContent = row ? Number(row.metricValues[1].value).toLocaleString() : "0";
-    document.getElementById('kpi-updated').textContent = today.toLocaleDateString();
+    const t = totals.rows && totals.rows[0];
+    const totalUsers = t ? Number(t.metricValues[0].value) : 0;
+    const newUsers = t ? Number(t.metricValues[1].value) : 0;
+    const sessions28 = t ? Number(t.metricValues[2].value) : 0;
+    const engRate = t ? Number(t.metricValues[3].value) : 0;
+    const avgEngTime = t ? Number(t.metricValues[4].value) : 0;
+    document.getElementById('kpi-totalUsers').textContent = totalUsers.toLocaleString();
+    document.getElementById('kpi-newUsers').textContent = newUsers.toLocaleString();
+    document.getElementById('kpi-sessions').textContent = sessions28.toLocaleString();
+    document.getElementById('kpi-engRate').textContent = (engRate * 100).toFixed(1) + "%";
+    document.getElementById('kpi-avgEngTime').textContent = fmtSecs(avgEngTime);
 
-    // Monthly sessions trend, last 12 months
+    // Monthly sessions trend
     const monthly = await ga4Report({
       dateRanges: [{ startDate: fmtDate(start12mo), endDate: fmtDate(today) }],
-      dimensions: [{ name: "yearMonth" }],
-      metrics: [{ name: "sessions" }],
+      dimensions: [{ name: "yearMonth" }], metrics: [{ name: "sessions" }],
       orderBys: [{ dimension: { dimensionName: "yearMonth" } }]
     });
     const months = (monthly.rows || []).map(r => r.dimensionValues[0].value);
-    const sessions = (monthly.rows || []).map(r => Number(r.metricValues[0].value));
-    renderBarTrend('sessionsChart', months, sessions, "Sessions");
+    const sessionsArr = (monthly.rows || []).map(r => Number(r.metricValues[0].value));
+    renderBarTrend('sessionsChart', months, sessionsArr, "Sessions");
 
-    // Sessions by channel
+    // Acquisition: bucket into 5 standard channels
     const channel = await ga4Report({
-      dateRanges: [{ startDate: fmtDate(start28), endDate: fmtDate(today) }],
-      dimensions: [{ name: "sessionDefaultChannelGroup" }],
-      metrics: [{ name: "sessions" }],
-      orderBys: [{ metric: { metricName: "sessions" }, desc: true }]
+      dateRanges: [r28], dimensions: [{ name: "sessionDefaultChannelGroup" }], metrics: [{ name: "sessions" }]
     });
-    const chLabels = (channel.rows || []).map(r => r.dimensionValues[0].value);
-    const chValues = (channel.rows || []).map(r => Number(r.metricValues[0].value));
-    renderDonut('channelChart', chLabels, chValues);
+    const buckets = { "Organic Search":0, "Direct":0, "Social":0, "Paid":0, "Referral":0, "Other":0 };
+    (channel.rows || []).forEach(r => { buckets[bucketChannel(r.dimensionValues[0].value)] += Number(r.metricValues[0].value); });
+    renderBars('acqChart', Object.keys(buckets), Object.values(buckets), "Sessions", true);
 
-    // Search Console: CTR + top queries, last 28 days
-    const gscTotals = await gscQuery({
-      startDate: fmtDate(start28), endDate: fmtDate(today), dimensions: []
+    // Top landing pages (GA4)
+    const landing = await ga4Report({
+      dateRanges: [r28], dimensions: [{ name: "landingPage" }], metrics: [{ name: "sessions" }],
+      orderBys: [{ metric: { metricName: "sessions" }, desc: true }], limit: 6
     });
+    fillTable('tbl-landing', (landing.rows || []).map(r => [r.dimensionValues[0].value, Number(r.metricValues[0].value).toLocaleString()]));
+
+    // Lead generation events
+    const evNames = Object.values(CONFIG.EVENTS);
+    const events = await ga4Report({
+      dateRanges: [r28], dimensions: [{ name: "eventName" }], metrics: [{ name: "eventCount" }],
+      dimensionFilter: { filter: { fieldName: "eventName", inListFilter: { values: evNames } } }
+    });
+    const evCounts = {};
+    (events.rows || []).forEach(r => { evCounts[r.dimensionValues[0].value] = Number(r.metricValues[0].value); });
+    document.getElementById('kpi-ev-form').textContent = (evCounts[CONFIG.EVENTS.form] || 0).toLocaleString();
+    document.getElementById('kpi-ev-quote').textContent = (evCounts[CONFIG.EVENTS.quote] || 0).toLocaleString();
+    document.getElementById('kpi-ev-messenger').textContent = (evCounts[CONFIG.EVENTS.messenger] || 0).toLocaleString();
+    document.getElementById('kpi-ev-phone').textContent = (evCounts[CONFIG.EVENTS.phone] || 0).toLocaleString();
+
+    // Search Console totals
+    const gscTotals = await gscQuery({ ...r28, dimensions: [] });
     const gRow = gscTotals.rows && gscTotals.rows[0];
-    document.getElementById('kpi-ctr').textContent = gRow ? (gRow.ctr * 100).toFixed(1) + "%" : "0%";
+    const ctr = gRow ? (gRow.ctr * 100).toFixed(2) : "0";
+    const pos = gRow ? gRow.position.toFixed(1) : "0";
+    document.getElementById('kpi-gsc-ctr').textContent = ctr + "%";
+    document.getElementById('kpi-gsc-pos').textContent = pos;
+    document.getElementById('kpi-gsc-clicks').textContent = gRow ? gRow.clicks.toLocaleString() : "0";
+    document.getElementById('kpi-gsc-impr').textContent = gRow ? gRow.impressions.toLocaleString() : "0";
 
-    const gscQueries = await gscQuery({
-      startDate: fmtDate(start28), endDate: fmtDate(today), dimensions: ["query"], rowLimit: 8
-    });
-    const qLabels = (gscQueries.rows || []).map(r => r.keys[0]);
-    const qValues = (gscQueries.rows || []).map(r => r.clicks);
-    renderBars('queriesChart', qLabels, qValues, "Clicks");
+    // Top keywords
+    const gscQueries = await gscQuery({ ...r28, dimensions: ["query"], rowLimit: 8 });
+    const queryRows = (gscQueries.rows || []);
+    fillTable('tbl-keywords', queryRows.map(r => [r.keys[0], r.clicks, r.impressions, (r.ctr*100).toFixed(1)+"%", r.position.toFixed(1)]));
+
+    // Top SEO landing pages
+    const gscPages = await gscQuery({ ...r28, dimensions: ["page"], rowLimit: 6 });
+    const pageRows = (gscPages.rows || []);
+    fillTable('tbl-gsc-pages', pageRows.map(r => [r.keys[0].replace(CONFIG.GSC_SITE_URL, "/"), r.clicks, r.position.toFixed(1)]));
 
     lastData = {
-      generatedAt: today,
-      sessions28: row ? Number(row.metricValues[0].value) : 0,
-      users28: row ? Number(row.metricValues[1].value) : 0,
-      ctr: gRow ? (gRow.ctr * 100).toFixed(2) : "0",
-      clicks: gRow ? gRow.clicks : 0,
-      impressions: gRow ? gRow.impressions : 0,
-      monthly: months.map((m, i) => ({ month: m, sessions: sessions[i] })),
-      channels: chLabels.map((c, i) => ({ channel: c, sessions: chValues[i] })),
-      queries: qLabels.map((q, i) => ({ query: q, clicks: qValues[i] }))
+      generatedAt: today, totalUsers, newUsers, sessions28, engRate: (engRate*100).toFixed(1), avgEngTime: fmtSecs(avgEngTime),
+      acquisition: buckets, landingPages: (landing.rows||[]).map(r=>({page:r.dimensionValues[0].value, sessions:Number(r.metricValues[0].value)})),
+      events: evCounts, gscCtr: ctr, gscPos: pos, gscClicks: gRow?gRow.clicks:0, gscImpr: gRow?gRow.impressions:0,
+      keywords: queryRows.map(r=>({query:r.keys[0], clicks:r.clicks, impressions:r.impressions, ctr:(r.ctr*100).toFixed(1), position:r.position.toFixed(1)})),
+      monthly: months.map((m,i)=>({month:m, sessions:sessionsArr[i]}))
     };
 
   } catch (err) {
     console.error(err);
-    alert("Error loading data — check your GA4_PROPERTY_ID / GSC_SITE_URL and that your Google account has access. Details in browser console.");
+    alert("Error loading data — check GA4_PROPERTY_ID / GSC_SITE_URL / event names and account access. Details in browser console.");
   }
+}
+
+function fillTable(tableId, rows) {
+  const tbody = document.querySelector(`#${tableId} tbody`);
+  tbody.innerHTML = rows.map(cells => `<tr>${cells.map(c => `<td>${c}</td>`).join("")}</tr>`).join("") || `<tr><td colspan="5" style="color:#7a8896;">No data</td></tr>`;
 }
 
 function renderBarTrend(canvasId, labels, data, label) {
   if (charts[canvasId]) charts[canvasId].destroy();
-  const ctx = document.getElementById(canvasId);
-  charts[canvasId] = new Chart(ctx, {
-    type: 'bar',
-    data: {
-      labels,
-      datasets: [
-        { type: 'bar', label, data, backgroundColor: '#4fa3e3', borderRadius: 3 },
-        { type: 'line', label: 'Trend', data, borderColor: '#7a8896', borderDash: [4,4], pointRadius: 0, borderWidth: 1.5, fill: false, tension: 0.3 }
-      ]
-    },
+  charts[canvasId] = new Chart(document.getElementById(canvasId), {
+    data: { labels, datasets: [
+      { type: 'bar', label, data, backgroundColor: '#4fa3e3', borderRadius: 3 },
+      { type: 'line', label: 'Trend', data, borderColor: '#7a8896', borderDash: [4,4], pointRadius: 0, borderWidth: 1.5, fill: false, tension: 0.3 }
+    ]},
     options: { responsive: true, plugins: { legend: { position: 'bottom' } }, scales: { y: { beginAtZero: true } } }
   });
 }
-
-function renderBars(canvasId, labels, data, label) {
+function renderBars(canvasId, labels, data, label, horizontal) {
   if (charts[canvasId]) charts[canvasId].destroy();
-  const ctx = document.getElementById(canvasId);
-  charts[canvasId] = new Chart(ctx, {
+  const colors = ['#3bb54a','#4fa3e3','#8e6ee6','#f2b705','#e6483a','#7a8896'];
+  charts[canvasId] = new Chart(document.getElementById(canvasId), {
     type: 'bar',
-    data: { labels, datasets: [{ label, data, backgroundColor: '#4fa3e3', borderRadius: 3 }] },
-    options: { indexAxis: 'y', responsive: true, plugins: { legend: { display: false } } }
+    data: { labels, datasets: [{ label, data, backgroundColor: colors, borderRadius: 3 }] },
+    options: { indexAxis: horizontal ? undefined : 'y', responsive: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
   });
 }
 
-function renderDonut(canvasId, labels, data) {
-  if (charts[canvasId]) charts[canvasId].destroy();
-  const ctx = document.getElementById(canvasId);
-  const colors = ['#e6483a','#3bb54a','#f2b705','#4fa3e3','#8e6ee6','#12233d','#e07b39','#6ec6c1'];
-  charts[canvasId] = new Chart(ctx, {
-    type: 'doughnut',
-    data: { labels, datasets: [{ data, backgroundColor: colors }] },
-    options: { responsive: true, plugins: { legend: { position: 'bottom' } } }
-  });
+/* ---------- Business Impact: manual + CSV import, persisted locally ---------- */
+const BI_KEY = "siegenBusinessImpact";
+function loadBusinessImpact() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(BI_KEY) || "{}");
+    document.getElementById('bi-mql').value = saved.mql || 0;
+    document.getElementById('bi-sql').value = saved.sql || 0;
+    document.getElementById('bi-proposals').value = saved.proposals || 0;
+    document.getElementById('bi-won').value = saved.won || 0;
+  } catch(e) {}
+}
+document.getElementById('bi-save-btn').addEventListener('click', () => {
+  const data = {
+    mql: Number(document.getElementById('bi-mql').value) || 0,
+    sql: Number(document.getElementById('bi-sql').value) || 0,
+    proposals: Number(document.getElementById('bi-proposals').value) || 0,
+    won: Number(document.getElementById('bi-won').value) || 0
+  };
+  localStorage.setItem(BI_KEY, JSON.stringify(data));
+  alert("Saved. These numbers will be remembered on this browser next time you open the dashboard.");
+});
+
+document.getElementById('bi-import-btn').addEventListener('click', () => document.getElementById('bi-file').click());
+document.getElementById('bi-file').addEventListener('change', (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (ev) => {
+    try {
+      const rows = parseCSV(ev.target.result);
+      const headerIdx = rows.findIndex(r => r.includes("Stage"));
+      if (headerIdx === -1) { alert("Couldn't find a 'Stage' column — make sure you exported the '2. Leads (CRM)' tab including its header row."); return; }
+      const headers = rows[headerIdx];
+      const stageCol = headers.indexOf("Stage");
+      const proposalDateCol = headers.indexOf("Proposal Sent Date");
+      const wonCol = headers.indexOf("Project Won? (Y/N)");
+      const dataRows = rows.slice(headerIdx + 1).filter(r => r.some(c => c && c.trim() !== ""));
+
+      let mql = 0, sql = 0, proposals = 0, won = 0;
+      const mqlStages = ["Qualified Lead","Proposal Sent","Negotiation","Won"];
+      const sqlStages = ["Proposal Sent","Negotiation","Won"];
+      dataRows.forEach(r => {
+        const stage = (r[stageCol] || "").trim();
+        if (mqlStages.includes(stage)) mql++;
+        if (sqlStages.includes(stage)) sql++;
+        if (proposalDateCol > -1 && r[proposalDateCol] && r[proposalDateCol].trim() !== "") proposals++;
+        if (wonCol > -1 && (r[wonCol] || "").trim().toUpperCase() === "Y") won++;
+      });
+      document.getElementById('bi-mql').value = mql;
+      document.getElementById('bi-sql').value = sql;
+      document.getElementById('bi-proposals').value = proposals;
+      document.getElementById('bi-won').value = won;
+      localStorage.setItem(BI_KEY, JSON.stringify({ mql, sql, proposals, won }));
+      alert(`Imported ${dataRows.length} lead rows.\nMQLs: ${mql}\nSQLs: ${sql}\nProposals Sent: ${proposals}\nProjects Won: ${won}`);
+    } catch (err) {
+      console.error(err);
+      alert("Couldn't parse that CSV. Make sure it's a plain CSV export of the Leads tab.");
+    }
+  };
+  reader.readAsText(file);
+  e.target.value = "";
+});
+
+function parseCSV(text) {
+  const rows = [];
+  let row = [], field = "", inQuotes = false;
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i], next = text[i+1];
+    if (inQuotes) {
+      if (c === '"' && next === '"') { field += '"'; i++; }
+      else if (c === '"') { inQuotes = false; }
+      else { field += c; }
+    } else {
+      if (c === '"') inQuotes = true;
+      else if (c === ',') { row.push(field); field = ""; }
+      else if (c === '\n' || c === '\r') {
+        if (c === '\r' && next === '\n') i++;
+        row.push(field); rows.push(row); row = []; field = "";
+      } else field += c;
+    }
+  }
+  if (field !== "" || row.length) { row.push(field); rows.push(row); }
+  return rows;
 }
 
 /* ---------- Sidebar nav actions ---------- */
@@ -299,78 +471,86 @@ const modalOverlay = document.getElementById('modal-overlay');
 const modalBody = document.getElementById('modal-body');
 document.getElementById('modal-close').addEventListener('click', () => modalOverlay.classList.remove('show'));
 modalOverlay.addEventListener('click', (e) => { if (e.target === modalOverlay) modalOverlay.classList.remove('show'); });
-
-function openModal(html) {
-  modalBody.innerHTML = html;
-  modalOverlay.classList.add('show');
-}
+function openModal(html) { modalBody.innerHTML = html; modalOverlay.classList.add('show'); }
 
 document.getElementById('nav-leads').addEventListener('click', () => {
-  openModal(`
-    <h2>Leads (CRM)</h2>
-    <div class="sub">Not part of this live dashboard</div>
-    <p style="font-size:14px;line-height:1.6;">Your prospect and lead pipeline is tracked separately in the
-    <b>Siegen Marketing Lead Dashboard.xlsx</b> workbook (Leads / Weekly Summary / Monthly Report / Source Attribution tabs).
-    That file lives on your computer or wherever you saved it — it isn't hosted on the web, so there's no live link to show here.</p>
-    <p style="font-size:14px;line-height:1.6;">If you'd like leads to show up on this page too, the workbook could be uploaded to
-    Google Sheets and connected — just ask and we can wire that up next.</p>
-  `);
+  openModal(`<h2>Leads (CRM)</h2><div class="sub">Not part of this live dashboard</div>
+    <p style="font-size:14px;line-height:1.6;">Tracked in the <b>Siegen Marketing Lead Dashboard.xlsx</b> workbook. Export its
+    <b>2. Leads (CRM)</b> tab as CSV and use the Business Impact section's Import button to pull MQL/SQL/Proposals/Won numbers in here.</p>`);
 });
 
 document.getElementById('nav-export').addEventListener('click', () => {
   if (!lastData) { alert("Sign in and let the dashboard load data first, then Export."); return; }
+  const bi = JSON.parse(localStorage.getItem(BI_KEY) || "{}");
   const lines = [];
-  lines.push("Siegen Marketing Dashboard Export");
+  lines.push("Siegen Executive Marketing Dashboard Export");
   lines.push("Generated," + lastData.generatedAt.toISOString());
   lines.push("");
-  lines.push("Metric,Value");
-  lines.push(`GA4 Sessions (28 days),${lastData.sessions28}`);
-  lines.push(`GA4 Users (28 days),${lastData.users28}`);
-  lines.push(`Search Console CTR (28 days),${lastData.ctr}%`);
-  lines.push(`Search Console Clicks (28 days),${lastData.clicks}`);
-  lines.push(`Search Console Impressions (28 days),${lastData.impressions}`);
+  lines.push("TRAFFIC & ENGAGEMENT");
+  lines.push(`Total Users (28d),${lastData.totalUsers}`);
+  lines.push(`New Users (28d),${lastData.newUsers}`);
+  lines.push(`Sessions (28d),${lastData.sessions28}`);
+  lines.push(`Engagement Rate,${lastData.engRate}%`);
+  lines.push(`Avg Engagement Time,${lastData.avgEngTime}`);
   lines.push("");
-  lines.push("Month,Sessions");
-  lastData.monthly.forEach(m => lines.push(`${m.month},${m.sessions}`));
+  lines.push("ACQUISITION (sessions by channel)");
+  Object.entries(lastData.acquisition).forEach(([k,v]) => lines.push(`${k},${v}`));
   lines.push("");
-  lines.push("Channel,Sessions");
-  lastData.channels.forEach(c => lines.push(`${c.channel},${c.sessions}`));
+  lines.push("LEAD GENERATION EVENTS (28d)");
+  Object.entries(CONFIG.EVENTS).forEach(([label,evName]) => lines.push(`${label} (${evName}),${lastData.events[evName]||0}`));
   lines.push("");
-  lines.push("Search Query,Clicks");
-  lastData.queries.forEach(q => lines.push(`"${q.query.replace(/"/g,'""')}",${q.clicks}`));
+  lines.push("SEO");
+  lines.push(`CTR,${lastData.gscCtr}%`);
+  lines.push(`Average Position,${lastData.gscPos}`);
+  lines.push(`Clicks,${lastData.gscClicks}`);
+  lines.push(`Impressions,${lastData.gscImpr}`);
+  lines.push("");
+  lines.push("Query,Clicks,Impressions,CTR,Position");
+  lastData.keywords.forEach(q => lines.push(`"${q.query.replace(/"/g,'""')}",${q.clicks},${q.impressions},${q.ctr}%,${q.position}`));
+  lines.push("");
+  lines.push("BUSINESS IMPACT (from CRM)");
+  lines.push(`MQLs,${bi.mql||0}`);
+  lines.push(`SQLs,${bi.sql||0}`);
+  lines.push(`Proposals Sent,${bi.proposals||0}`);
+  lines.push(`Projects Won,${bi.won||0}`);
 
   const blob = new Blob([lines.join("\n")], { type: "text/csv" });
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
-  a.href = url;
-  a.download = `siegen-dashboard-export-${fmtDate(lastData.generatedAt)}.csv`;
-  a.click();
+  a.href = url; a.download = `siegen-executive-dashboard-${fmtDate(lastData.generatedAt)}.csv`; a.click();
   URL.revokeObjectURL(url);
 });
 
 document.getElementById('nav-weekly').addEventListener('click', () => {
   if (!lastData) { alert("Sign in and let the dashboard load data first, then open the Weekly Report."); return; }
-  const monthlyRows = lastData.monthly.map(m => `<div class="report-row"><span>${m.month}</span><b>${m.sessions.toLocaleString()}</b></div>`).join("");
-  const channelRows = lastData.channels.map(c => `<div class="report-row"><span>${c.channel}</span><b>${c.sessions.toLocaleString()}</b></div>`).join("");
-  const queryRows = lastData.queries.slice(0,5).map(q => `<div class="report-row"><span>${q.query}</span><b>${q.clicks} clicks</b></div>`).join("");
+  const bi = JSON.parse(localStorage.getItem(BI_KEY) || "{}");
+  const acqRows = Object.entries(lastData.acquisition).map(([k,v]) => `<div class="report-row"><span>${k}</span><b>${v.toLocaleString()}</b></div>`).join("");
+  const kwRows = lastData.keywords.slice(0,5).map(q => `<div class="report-row"><span>${q.query}</span><b>${q.clicks} clicks</b></div>`).join("");
   openModal(`
-    <h2>Weekly Report</h2>
+    <h2>Weekly Executive Report</h2>
     <div class="sub">Generated ${lastData.generatedAt.toLocaleString()} — figures reflect the last 28 days</div>
-    <div class="report-row"><span>GA4 Sessions</span><b>${lastData.sessions28.toLocaleString()}</b></div>
-    <div class="report-row"><span>GA4 Users</span><b>${lastData.users28.toLocaleString()}</b></div>
-    <div class="report-row"><span>Search Console CTR</span><b>${lastData.ctr}%</b></div>
-    <div class="report-row"><span>Search Console Clicks</span><b>${lastData.clicks.toLocaleString()}</b></div>
-    <div class="report-row"><span>Search Console Impressions</span><b>${lastData.impressions.toLocaleString()}</b></div>
-    <div class="report-section">Sessions by Month</div>
-    ${monthlyRows}
-    <div class="report-section">Sessions by Channel</div>
-    ${channelRows}
-    <div class="report-section">Top 5 Search Queries</div>
-    ${queryRows}
+    <div class="report-section">Traffic</div>
+    <div class="report-row"><span>Total Users</span><b>${lastData.totalUsers.toLocaleString()}</b></div>
+    <div class="report-row"><span>New Users</span><b>${lastData.newUsers.toLocaleString()}</b></div>
+    <div class="report-row"><span>Sessions</span><b>${lastData.sessions28.toLocaleString()}</b></div>
+    <div class="report-section">Acquisition</div>
+    ${acqRows}
+    <div class="report-section">Engagement</div>
+    <div class="report-row"><span>Engagement Rate</span><b>${lastData.engRate}%</b></div>
+    <div class="report-row"><span>Avg Engagement Time</span><b>${lastData.avgEngTime}</b></div>
+    <div class="report-section">SEO</div>
+    <div class="report-row"><span>CTR</span><b>${lastData.gscCtr}%</b></div>
+    <div class="report-row"><span>Average Position</span><b>${lastData.gscPos}</b></div>
+    <div class="report-section">Top Keywords</div>
+    ${kwRows}
+    <div class="report-section">Business Impact</div>
+    <div class="report-row"><span>MQLs</span><b>${bi.mql||0}</b></div>
+    <div class="report-row"><span>SQLs</span><b>${bi.sql||0}</b></div>
+    <div class="report-row"><span>Proposals Sent</span><b>${bi.proposals||0}</b></div>
+    <div class="report-row"><span>Projects Won</span><b>${bi.won||0}</b></div>
     <button class="action" onclick="window.print()">Print / Save as PDF</button>
   `);
 });
-
 </script>
 </body>
 </html>
