@@ -64,6 +64,12 @@
   .report-row b{color:var(--navy);}
   .report-section{margin-top:16px;font-size:11.5px;text-transform:uppercase;letter-spacing:.03em;color:var(--muted);font-weight:700;}
   .modal-box button.action{margin-top:18px;background:var(--navy);color:#fff;border:none;padding:9px 16px;border-radius:5px;font-size:13px;}
+  .rec{display:flex;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);font-size:13.5px;line-height:1.5;}
+  .rec:last-child{border-bottom:none;}
+  .rec .tag{flex-shrink:0;font-size:10px;font-weight:700;text-transform:uppercase;padding:3px 8px;border-radius:10px;height:fit-content;white-space:nowrap;}
+  .rec .tag.leads{background:#e2efda;color:#375623;}
+  .rec .tag.seo{background:#dbe9f6;color:#1f4e79;}
+  .rec .tag.ops{background:#fce4d6;color:#7a3b00;}
 </style>
 </head>
 <body>
@@ -88,6 +94,21 @@
 
     <div class="content">
       <div class="config-banner" id="config-banner">⚠️ CLIENT_ID / GA4_PROPERTY_ID / GSC_SITE_URL missing in CONFIG — see script comments.</div>
+
+      <!-- OVERVIEW -->
+      <div class="section-title">🧭 Overview — At a Glance</div>
+      <div class="kpi-row" style="grid-template-columns:repeat(6,1fr);">
+        <div class="kpi navy"><div class="val" id="ov-totalLeads">–</div><div class="lbl">Total Leads</div></div>
+        <div class="kpi blue"><div class="val" id="ov-sessions">–</div><div class="lbl">Sessions (28d)</div></div>
+        <div class="kpi green"><div class="val" id="ov-winRate">–</div><div class="lbl">Lead → Win Rate</div></div>
+        <div class="kpi purple"><div class="val" id="ov-engRate">–</div><div class="lbl">Engagement Rate</div></div>
+        <div class="kpi yellow"><div class="val" id="ov-avgPos">–</div><div class="lbl">SEO Avg Position</div></div>
+        <div class="kpi red"><div class="val" id="ov-ctr">–</div><div class="lbl">SEO CTR</div></div>
+      </div>
+      <div class="card" style="margin-top:14px;">
+        <h3>📌 Recommendations — How to Scale Leads &amp; Improve SEO</h3>
+        <div id="recommendations"><div class="placeholder">Sign in to generate recommendations from your live data.</div></div>
+      </div>
 
       <!-- TRAFFIC -->
       <div class="section-title">📈 Traffic</div>
@@ -124,11 +145,14 @@
 
       <!-- LEAD GENERATION -->
       <div class="section-title">🎯 Lead Generation (GA4 events, 28d)</div>
-      <div class="kpi-row">
-        <div class="kpi red"><div class="val" id="kpi-ev-form">–</div><div class="lbl">Contact Form Submissions</div></div>
+      <div class="kpi-row" style="grid-template-columns:repeat(3,1fr);">
+        <div class="kpi red"><div class="val" id="kpi-ev-form">–</div><div class="lbl">Wix Form Submissions</div></div>
         <div class="kpi yellow"><div class="val" id="kpi-ev-quote">–</div><div class="lbl">Quote Requests</div></div>
         <div class="kpi blue"><div class="val" id="kpi-ev-messenger">–</div><div class="lbl">Messenger Clicks</div></div>
-        <div class="kpi green"><div class="val" id="kpi-ev-phone">–</div><div class="lbl">Phone Clicks</div></div>
+      </div>
+      <div class="card" style="margin-top:14px;">
+        <h3>Lead Events — Daily Trend (28 days)</h3>
+        <canvas id="leadEventsChart" height="80"></canvas>
       </div>
       <div class="note" id="lead-event-note"></div>
 
@@ -201,10 +225,9 @@ const CONFIG = {
   SHEET_TAB: "Dashboard",
   // Edit these to match your actual GTM/GA4 event names once you confirm them in GA4 > Admin > Events
   EVENTS: {
-    form: "form_submit",
-    quote: "generate_lead",
-    messenger: "messenger_click",
-    phone: "phone_click"
+    form: "form_submit",       // Wix form submission
+    quote: "generate_lead",    // Quote request
+    messenger: "messenger_click"
   }
 };
 /* ========================================================= */
@@ -215,9 +238,9 @@ let accessToken = null, tokenClient = null, charts = {}, lastData = null;
 if (CONFIG.CLIENT_ID.startsWith("YOUR_")) document.getElementById('config-banner').style.display = 'block';
 
 document.getElementById('lead-event-note').innerHTML =
-  `Looking for GA4 events named: <b>${CONFIG.EVENTS.form}</b> (form), <b>${CONFIG.EVENTS.quote}</b> (quote), ` +
-  `<b>${CONFIG.EVENTS.messenger}</b> (Messenger), <b>${CONFIG.EVENTS.phone}</b> (phone). ` +
-  `If these show 0 but you know people are submitting forms/clicking, check GA4 → Admin → Events for the real event names and edit CONFIG.EVENTS at the top of this file to match.`;
+  `Looking for GA4 events named: <b>${CONFIG.EVENTS.form}</b> (Wix form submission), <b>${CONFIG.EVENTS.quote}</b> (quote request), ` +
+  `<b>${CONFIG.EVENTS.messenger}</b> (Messenger click). ` +
+  `If these show 0 but you know people are submitting forms/clicking Messenger, check GA4 → Admin → Events for the real event names and edit CONFIG.EVENTS at the top of this file to match.`;
 
 window.onload = () => {
   if (!window.google || CONFIG.CLIENT_ID.startsWith("YOUR_")) return;
@@ -340,7 +363,23 @@ async function loadAll() {
     document.getElementById('kpi-ev-form').textContent = (evCounts[CONFIG.EVENTS.form] || 0).toLocaleString();
     document.getElementById('kpi-ev-quote').textContent = (evCounts[CONFIG.EVENTS.quote] || 0).toLocaleString();
     document.getElementById('kpi-ev-messenger').textContent = (evCounts[CONFIG.EVENTS.messenger] || 0).toLocaleString();
-    document.getElementById('kpi-ev-phone').textContent = (evCounts[CONFIG.EVENTS.phone] || 0).toLocaleString();
+
+    // Lead events daily trend
+    const eventsDaily = await ga4Report({
+      dateRanges: [r28], dimensions: [{ name: "date" }, { name: "eventName" }], metrics: [{ name: "eventCount" }],
+      dimensionFilter: { filter: { fieldName: "eventName", inListFilter: { values: evNames } } },
+      orderBys: [{ dimension: { dimensionName: "date" } }]
+    });
+    const dayMap = {}; // date -> { form, quote, messenger }
+    (eventsDaily.rows || []).forEach(r => {
+      const d = r.dimensionValues[0].value, ev = r.dimensionValues[1].value, c = Number(r.metricValues[0].value);
+      if (!dayMap[d]) dayMap[d] = { form: 0, quote: 0, messenger: 0 };
+      if (ev === CONFIG.EVENTS.form) dayMap[d].form += c;
+      else if (ev === CONFIG.EVENTS.quote) dayMap[d].quote += c;
+      else if (ev === CONFIG.EVENTS.messenger) dayMap[d].messenger += c;
+    });
+    const evDates = Object.keys(dayMap).sort();
+    renderLeadEventsChart(evDates, evDates.map(d => dayMap[d].form), evDates.map(d => dayMap[d].quote), evDates.map(d => dayMap[d].messenger));
 
     // Search Console totals
     const gscTotals = await gscQuery({ ...r28, dimensions: [] });
@@ -381,6 +420,9 @@ async function loadAll() {
       bi
     };
 
+    renderOverview(lastData);
+    renderRecommendations(lastData);
+
   } catch (err) {
     console.error(err);
     alert("Error loading data — check GA4_PROPERTY_ID / GSC_SITE_URL / event names and account access. Details in browser console.");
@@ -390,6 +432,64 @@ async function loadAll() {
 function fillTable(tableId, rows) {
   const tbody = document.querySelector(`#${tableId} tbody`);
   tbody.innerHTML = rows.map(cells => `<tr>${cells.map(c => `<td>${c}</td>`).join("")}</tr>`).join("") || `<tr><td colspan="5" style="color:#7a8896;">No data</td></tr>`;
+}
+
+function renderOverview(d) {
+  const bi = d.bi || {};
+  const winRate = bi.totalLeads ? ((bi.wins / bi.totalLeads) * 100).toFixed(1) : "0";
+  document.getElementById('ov-totalLeads').textContent = (bi.totalLeads || 0).toLocaleString();
+  document.getElementById('ov-sessions').textContent = d.sessions28.toLocaleString();
+  document.getElementById('ov-winRate').textContent = winRate + "%";
+  document.getElementById('ov-engRate').textContent = d.engRate + "%";
+  document.getElementById('ov-avgPos').textContent = d.gscPos;
+  document.getElementById('ov-ctr').textContent = d.gscCtr + "%";
+}
+
+function renderRecommendations(d) {
+  const bi = d.bi || {};
+  const recs = [];
+  const pos = Number(d.gscPos), ctr = Number(d.gscCtr);
+  const paidSessions = d.acquisition["Paid"] || 0;
+  const organicSessions = d.acquisition["Organic Search"] || 0;
+  const totalSessions = Object.values(d.acquisition).reduce((a,b) => a+b, 0) || 1;
+  const organicShare = (organicSessions / totalSessions) * 100;
+  const pendingShare = bi.totalLeads ? (bi.pending / bi.totalLeads) * 100 : 0;
+  const winRate = bi.totalLeads ? (bi.wins / bi.totalLeads) * 100 : 0;
+
+  // SEO
+  if (pos > 20) {
+    recs.push({ tag: "seo", text: `Average Search Console position is ${d.gscPos} (typically page 2+). Rather than chasing broad terms, target long-tail, high-intent keywords (e.g. "AGT tank price Philippines", "underground storage tank supplier") where you can realistically rank faster.` });
+  } else if (pos > 10) {
+    recs.push({ tag: "seo", text: `Average position ${d.gscPos} is close to page 1. Strengthen on-page SEO (title tags, H1s, internal links) on your top landing pages to push into the top 10 — small, focused edits here tend to move the needle fastest.` });
+  } else {
+    recs.push({ tag: "seo", text: `Average position ${d.gscPos} is strong. Focus next on expanding content to capture more keyword variations rather than fixing existing rankings.` });
+  }
+  if (ctr < 2) {
+    recs.push({ tag: "seo", text: `CTR is ${d.gscCtr}% against ${Number(d.gscImpr).toLocaleString()} impressions — people are seeing you in search but not clicking. Rewrite meta titles/descriptions to lead with a concrete value signal ("Same-day indicative quote", "ISO-certified fabrication") rather than just the product name.` });
+  }
+
+  // Acquisition
+  if (paidSessions === 0) {
+    recs.push({ tag: "leads", text: `Paid channel shows 0 sessions in the last 28 days. Since Google Ads campaigns are reportedly already built and just pending budget approval, this is likely your fastest lever to add qualified traffic without waiting on SEO to compound.` });
+  }
+  if (organicShare < 30) {
+    recs.push({ tag: "seo", text: `Organic Search is only ${organicShare.toFixed(0)}% of sessions. Keep the daily habit of one educational post/page improvement — organic is the channel most likely to compound over the next 90 days.` });
+  }
+
+  // Funnel / ops
+  if (bi.totalLeads && pendingShare > 25) {
+    recs.push({ tag: "ops", text: `${pendingShare.toFixed(0)}% of leads (${bi.pending} of ${bi.totalLeads}) are still Pending/Unaccommodated. Since volume isn't the constraint, speeding up first response — same-day indicative estimate + formal engineered quote within 3–5 days — should convert more of this backlog before competitors respond first.` });
+  }
+  if (bi.totalLeads && winRate < 5) {
+    recs.push({ tag: "ops", text: `Only ${winRate.toFixed(1)}% of leads convert to Wins (${bi.wins} of ${bi.totalLeads}). This points to follow-through, not lead volume, as the real constraint — tightening proposal turnaround and follow-up cadence will likely move revenue more than adding more top-of-funnel spend.` });
+  }
+  if (bi.rfqSent > bi.mql) {
+    recs.push({ tag: "ops", text: `Engineering RFQs sent (${bi.rfqSent}) exceed leads marked past Awareness stage (${bi.mql}). This suggests some leads get an RFQ before their Stage field is updated — worth a quick team habit check so the funnel stages reflect reality and this dashboard stays accurate.` });
+  }
+
+  document.getElementById('recommendations').innerHTML = recs.map(r =>
+    `<div class="rec"><span class="tag ${r.tag}">${r.tag === 'seo' ? 'SEO' : r.tag === 'leads' ? 'Leads' : 'Ops'}</span><span>${r.text}</span></div>`
+  ).join("") || '<div class="placeholder">No specific flags this period — numbers look within normal range.</div>';
 }
 
 function renderBarTrend(canvasId, labels, data, label) {
@@ -409,6 +509,19 @@ function renderBars(canvasId, labels, data, label, horizontal) {
     type: 'bar',
     data: { labels, datasets: [{ label, data, backgroundColor: colors, borderRadius: 3 }] },
     options: { indexAxis: horizontal ? undefined : 'y', responsive: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
+  });
+}
+function renderLeadEventsChart(labels, formData, quoteData, messengerData) {
+  const id = 'leadEventsChart';
+  if (charts[id]) charts[id].destroy();
+  charts[id] = new Chart(document.getElementById(id), {
+    type: 'line',
+    data: { labels, datasets: [
+      { label: 'Wix Form Submissions', data: formData, borderColor: '#e6483a', backgroundColor: '#e6483a', tension: 0.3 },
+      { label: 'Quote Requests', data: quoteData, borderColor: '#f2b705', backgroundColor: '#f2b705', tension: 0.3 },
+      { label: 'Messenger Clicks', data: messengerData, borderColor: '#3c8ce0', backgroundColor: '#3c8ce0', tension: 0.3 }
+    ]},
+    options: { responsive: true, plugins: { legend: { position: 'bottom' } }, scales: { y: { beginAtZero: true, ticks: { precision: 0 } } } }
   });
 }
 
