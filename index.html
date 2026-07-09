@@ -50,6 +50,7 @@
   .kpi-row.five{grid-template-columns:repeat(5,1fr);}
   .kpi{background:#fff;border:1px solid var(--border);border-radius:18px;padding:16px 18px 17px;color:var(--navy);position:relative;overflow:hidden;min-height:76px;box-shadow:var(--shadow);}
   .kpi::before{content:"";display:inline-block;width:32px;height:32px;border-radius:10px;margin-bottom:10px;}
+  .kpi::after{content:"";position:absolute;top:23px;left:25px;width:18px;height:18px;-webkit-mask-size:contain;mask-size:contain;-webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;-webkit-mask-position:center;mask-position:center;}
   .kpi .val{font-size:24px;font-weight:800;line-height:1.1;letter-spacing:-.01em;color:var(--ink);}
   .kpi .lbl{font-size:11.5px;color:var(--muted);font-weight:600;margin-top:4px;}
   .kpi.green::before{background-color:rgba(91,157,249,.15);box-shadow:inset 0 0 0 1px rgba(91,157,249,.25);}
@@ -58,6 +59,34 @@
   .kpi.yellow::before{background-color:rgba(91,107,130,.12);box-shadow:inset 0 0 0 1px rgba(91,107,130,.22);}
   .kpi.purple::before{background-color:rgba(26,50,82,.14);box-shadow:inset 0 0 0 1px rgba(26,50,82,.22);}
   .kpi.navy::before{background-color:rgba(18,35,61,.12);box-shadow:inset 0 0 0 1px rgba(18,35,61,.22);}
+  .kpi.green::after{background-color:var(--primary-dark);}
+  .kpi.red::after{background-color:var(--charcoal);}
+  .kpi.blue::after{background-color:var(--primary);}
+  .kpi.yellow::after{background-color:var(--slate);}
+  .kpi.purple::after{background-color:var(--navy-2);}
+  .kpi.navy::after{background-color:var(--navy);}
+  .bi-card{position:relative;}
+  .bi-card[data-icon]{padding-top:38px !important;}
+  .bi-card[data-icon]::after{content:"";position:absolute;top:14px;left:50%;transform:translateX(-50%);width:20px;height:20px;-webkit-mask-size:contain;mask-size:contain;-webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;-webkit-mask-position:center;mask-position:center;background-color:var(--primary);}
+  [data-icon="users"]::after{-webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2'/%3E%3Ccircle cx='9' cy='7' r='4'/%3E%3Cpath d='M22 21v-2a4 4 0 0 0-3-3.87'/%3E%3Cpath d='M16 3.13a4 4 0 0 1 0 7.75'/%3E%3C/svg%3E");mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2'/%3E%3Ccircle cx='9' cy='7' r='4'/%3E%3Cpath d='M22 21v-2a4 4 0 0 0-3-3.87'/%3E%3Cpath d='M16 3.13a4 4 0 0 1 0 7.75'/%3E%3C/svg%3E");}
+  [data-icon="user-plus"]::after{-webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2'/%3E%3Ccircle cx='9' cy='7' r='4'/%3E%3Cpath d='M19 8v6'/%3E%3Cpath d='M22 11h-6'/%3E%3C/svg%3E");mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2'/%3E%3Ccircle cx='9' cy='7' r='4'/%3E%3Cpath d='M19 8v6'/%3E%3Cpath d='M22 11h-6'/%3E%3C/svg%3E");}
+  [data-icon="activity"]::after{-webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M22 12h-4l-3 9L9 3l-3 9H2'/%3E%3C/svg%3E");mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M22 12h-4l-3 9L9 3l-3 9H2'/%3E%3C/svg%3E");}
+  [data-icon="target"]::after{-webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='9'/%3E%3Ccircle cx='12' cy='12' r='5'/%3E%3Ccircle cx='12' cy='12' r='1'/%3E%3C/svg%3E");mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='9'/%3E%3Ccircle cx='12' cy='12' r='5'/%3E%3Ccircle cx='12' cy='12' r='1'/%3E%3C/svg%3E");}
+  [data-icon="heart"]::after{-webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z'/%3E%3C/svg%3E");mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z'/%3E%3C/svg%3E");}
+  [data-icon="bar-chart"]::after{-webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M18 20V10'/%3E%3Cpath d='M12 20V4'/%3E%3Cpath d='M6 20v-6'/%3E%3C/svg%3E");mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M18 20V10'/%3E%3Cpath d='M12 20V4'/%3E%3Cpath d='M6 20v-6'/%3E%3C/svg%3E");}
+  [data-icon="cursor-click"]::after{-webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M9 9l11 4-4.5 2L13 20z'/%3E%3Cpath d='M3 3l3 3'/%3E%3Cpath d='M3 9h3'/%3E%3Cpath d='M9 3v3'/%3E%3C/svg%3E");mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M9 9l11 4-4.5 2L13 20z'/%3E%3Cpath d='M3 3l3 3'/%3E%3Cpath d='M3 9h3'/%3E%3Cpath d='M9 3v3'/%3E%3C/svg%3E");}
+  [data-icon="pointer"]::after{-webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 3l7.07 16.97 2.51-7.39 7.39-2.51z'/%3E%3C/svg%3E");mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 3l7.07 16.97 2.51-7.39 7.39-2.51z'/%3E%3C/svg%3E");}
+  [data-icon="file-text"]::after{-webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z'/%3E%3Cpath d='M14 2v6h6'/%3E%3Cpath d='M9 13h6'/%3E%3Cpath d='M9 17h6'/%3E%3C/svg%3E");mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z'/%3E%3Cpath d='M14 2v6h6'/%3E%3Cpath d='M9 13h6'/%3E%3Cpath d='M9 17h6'/%3E%3C/svg%3E");}
+  [data-icon="message-square"]::after{-webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z'/%3E%3C/svg%3E");mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z'/%3E%3C/svg%3E");}
+  [data-icon="message-circle"]::after{-webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8z'/%3E%3C/svg%3E");mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8z'/%3E%3C/svg%3E");}
+  [data-icon="eye"]::after{-webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z'/%3E%3Ccircle cx='12' cy='12' r='3'/%3E%3C/svg%3E");mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z'/%3E%3Ccircle cx='12' cy='12' r='3'/%3E%3C/svg%3E");}
+  [data-icon="check-circle"]::after{-webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='10'/%3E%3Cpath d='M8 12l3 3 5-6'/%3E%3C/svg%3E");mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='10'/%3E%3Cpath d='M8 12l3 3 5-6'/%3E%3C/svg%3E");}
+  [data-icon="clock"]::after{-webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='10'/%3E%3Cpath d='M12 6v6l4 2'/%3E%3C/svg%3E");mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='10'/%3E%3Cpath d='M12 6v6l4 2'/%3E%3C/svg%3E");}
+  [data-icon="calendar"]::after{-webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='4' width='18' height='18' rx='2'/%3E%3Cpath d='M16 2v4'/%3E%3Cpath d='M8 2v4'/%3E%3Cpath d='M3 10h18'/%3E%3C/svg%3E");mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='4' width='18' height='18' rx='2'/%3E%3Cpath d='M16 2v4'/%3E%3Cpath d='M8 2v4'/%3E%3Cpath d='M3 10h18'/%3E%3C/svg%3E");}
+  [data-icon="filter"]::after{-webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M22 3H2l8 9.5V19l4 2v-8.5z'/%3E%3C/svg%3E");mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M22 3H2l8 9.5V19l4 2v-8.5z'/%3E%3C/svg%3E");}
+  [data-icon="send"]::after{-webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M22 2L11 13'/%3E%3Cpath d='M22 2l-7 20-4-9-9-4z'/%3E%3C/svg%3E");mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M22 2L11 13'/%3E%3Cpath d='M22 2l-7 20-4-9-9-4z'/%3E%3C/svg%3E");}
+  [data-icon="trophy"]::after{-webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M8 21h8'/%3E%3Cpath d='M12 17v4'/%3E%3Cpath d='M7 4h10v5a5 5 0 0 1-10 0z'/%3E%3Cpath d='M7 6H4a2 2 0 0 0 2 4h1'/%3E%3Cpath d='M17 6h3a2 2 0 0 1-2 4h-1'/%3E%3C/svg%3E");mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M8 21h8'/%3E%3Cpath d='M12 17v4'/%3E%3Cpath d='M7 4h10v5a5 5 0 0 1-10 0z'/%3E%3Cpath d='M7 6H4a2 2 0 0 0 2 4h1'/%3E%3Cpath d='M17 6h3a2 2 0 0 1-2 4h-1'/%3E%3C/svg%3E");}
+  [data-icon="link"]::after{-webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M10 13a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1'/%3E%3Cpath d='M14 11a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1'/%3E%3C/svg%3E");mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M10 13a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1'/%3E%3Cpath d='M14 11a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1'/%3E%3C/svg%3E");}
   .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:14px;}
   .split-row{display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start;}
   @media (max-width:900px){ .split-row{grid-template-columns:1fr;} .kpi-row{grid-template-columns:repeat(2,1fr);} }
@@ -121,13 +150,14 @@
 
       <!-- OVERVIEW -->
       <div class="section-title">🧭 Overview — At a Glance</div>
-      <div class="kpi-row" style="grid-template-columns:repeat(6,1fr); margin-bottom:34px;">
-        <div class="kpi navy"><div class="val" id="ov-totalLeads">–</div><div class="lbl">Total Leads</div></div>
-        <div class="kpi blue"><div class="val" id="ov-sessions">–</div><div class="lbl">Sessions (28d)</div></div>
-        <div class="kpi green"><div class="val" id="ov-winRate">–</div><div class="lbl">Lead → Win Rate</div></div>
-        <div class="kpi purple"><div class="val" id="ov-engRate">–</div><div class="lbl">Engagement Rate</div></div>
-        <div class="kpi yellow"><div class="val" id="ov-avgPos">–</div><div class="lbl">SEO Avg Position</div></div>
-        <div class="kpi red"><div class="val" id="ov-ctr">–</div><div class="lbl">SEO CTR</div></div>
+      <div class="kpi-row" style="grid-template-columns:repeat(7,1fr); margin-bottom:34px;">
+        <div class="kpi navy" data-icon="users"><div class="val" id="ov-totalLeads">–</div><div class="lbl">Total Leads</div></div>
+        <div class="kpi blue" data-icon="activity"><div class="val" id="ov-sessions">–</div><div class="lbl">Sessions (28d)</div></div>
+        <div class="kpi green" data-icon="target"><div class="val" id="ov-winRate">–</div><div class="lbl">Lead → Win Rate</div></div>
+        <div class="kpi purple" data-icon="heart"><div class="val" id="ov-engRate">–</div><div class="lbl">Engagement Rate</div></div>
+        <div class="kpi yellow" data-icon="bar-chart"><div class="val" id="ov-avgPos">–</div><div class="lbl">SEO Avg Position</div></div>
+        <div class="kpi red" data-icon="cursor-click"><div class="val" id="ov-ctr">–</div><div class="lbl">SEO CTR</div></div>
+        <div class="kpi navy" data-icon="calendar"><div class="val" id="ov-avgPerDay">–</div><div class="lbl">Avg Leads / Day</div></div>
       </div>
 
       <!-- TRAFFIC + LEAD GENERATION (side by side) -->
@@ -135,10 +165,10 @@
         <div>
           <div class="section-title">📈 Traffic</div>
           <div class="kpi-row" style="grid-template-columns:repeat(2,1fr);">
-            <div class="kpi green"><div class="val" id="kpi-totalUsers">–</div><div class="lbl">Total Users (28d)</div></div>
-            <div class="kpi blue"><div class="val" id="kpi-newUsers">–</div><div class="lbl">New Users (28d)</div></div>
-            <div class="kpi navy"><div class="val" id="kpi-sessions">–</div><div class="lbl">Sessions (28d)</div></div>
-            <div class="kpi purple"><div class="val" id="kpi-engRate">–</div><div class="lbl">Engagement Rate</div></div>
+            <div class="kpi green" data-icon="users"><div class="val" id="kpi-totalUsers">–</div><div class="lbl">Total Users (28d)</div></div>
+            <div class="kpi blue" data-icon="user-plus"><div class="val" id="kpi-newUsers">–</div><div class="lbl">New Users (28d)</div></div>
+            <div class="kpi navy" data-icon="activity"><div class="val" id="kpi-sessions">–</div><div class="lbl">Sessions (28d)</div></div>
+            <div class="kpi purple" data-icon="heart"><div class="val" id="kpi-engRate">–</div><div class="lbl">Engagement Rate</div></div>
           </div>
           <div class="card" style="margin-top:14px;">
             <h3>Monthly Sessions + Trend</h3>
@@ -148,9 +178,9 @@
         <div>
           <div class="section-title">🎯 Lead Generation (GA4 events, 28d)</div>
           <div class="kpi-row" style="grid-template-columns:repeat(3,1fr);">
-            <div class="kpi red"><div class="val" id="kpi-ev-form">–</div><div class="lbl">Wix Form Submissions</div></div>
-            <div class="kpi yellow"><div class="val" id="kpi-ev-quote">–</div><div class="lbl">Quote Requests</div></div>
-            <div class="kpi blue"><div class="val" id="kpi-ev-messenger">–</div><div class="lbl">Messenger Clicks</div></div>
+            <div class="kpi red" data-icon="file-text"><div class="val" id="kpi-ev-form">–</div><div class="lbl">Wix Form Submissions</div></div>
+            <div class="kpi yellow" data-icon="message-square"><div class="val" id="kpi-ev-quote">–</div><div class="lbl">Quote Requests</div></div>
+            <div class="kpi blue" data-icon="message-circle"><div class="val" id="kpi-ev-messenger">–</div><div class="lbl">Messenger Clicks</div></div>
           </div>
           <div class="card" style="margin-top:14px;">
             <h3>Lead Events — Daily Trend (28 days)</h3>
@@ -166,7 +196,7 @@
           <div class="section-title">⏱ Engagement</div>
           <div class="card">
             <h3>Average Engagement Time</h3>
-            <div class="bi-card" style="border:none;padding:6px;">
+            <div class="bi-card" data-icon="clock" style="border:none;padding:6px;">
               <div class="val" id="kpi-avgEngTime">–</div>
               <div class="lbl">per session (28 days)</div>
             </div>
@@ -185,10 +215,10 @@
       <!-- SEO -->
       <div class="section-title">🔍 SEO (Search Console, 28d)</div>
       <div class="kpi-row">
-        <div class="kpi red"><div class="val" id="kpi-gsc-ctr">–</div><div class="lbl">CTR</div></div>
-        <div class="kpi navy"><div class="val" id="kpi-gsc-pos">–</div><div class="lbl">Average Position</div></div>
-        <div class="kpi green"><div class="val" id="kpi-gsc-clicks">–</div><div class="lbl">Total Clicks</div></div>
-        <div class="kpi blue"><div class="val" id="kpi-gsc-impr">–</div><div class="lbl">Total Impressions</div></div>
+        <div class="kpi red" data-icon="cursor-click"><div class="val" id="kpi-gsc-ctr">–</div><div class="lbl">CTR</div></div>
+        <div class="kpi navy" data-icon="bar-chart"><div class="val" id="kpi-gsc-pos">–</div><div class="lbl">Average Position</div></div>
+        <div class="kpi green" data-icon="pointer"><div class="val" id="kpi-gsc-clicks">–</div><div class="lbl">Total Clicks</div></div>
+        <div class="kpi blue" data-icon="eye"><div class="val" id="kpi-gsc-impr">–</div><div class="lbl">Total Impressions</div></div>
       </div>
       <div class="grid2">
         <div class="card">
@@ -204,16 +234,16 @@
       <!-- BUSINESS IMPACT -->
       <div class="section-title">💼 Business Impact (live from Leads Masterlist)</div>
       <div class="kpi-row">
-        <div class="kpi navy"><div class="val" id="bi-total">–</div><div class="lbl">Total Leads</div></div>
-        <div class="kpi blue"><div class="val" id="bi-accommodated">–</div><div class="lbl">Leads Accommodated</div></div>
-        <div class="kpi yellow"><div class="val" id="bi-pending">–</div><div class="lbl">Pending / Unaccommodated</div></div>
-        <div class="kpi purple"><div class="val" id="bi-avgdaily">–</div><div class="lbl">Avg Daily Leads</div></div>
+        <div class="kpi navy" data-icon="users"><div class="val" id="bi-total">–</div><div class="lbl">Total Leads</div></div>
+        <div class="kpi blue" data-icon="check-circle"><div class="val" id="bi-accommodated">–</div><div class="lbl">Leads Accommodated</div></div>
+        <div class="kpi yellow" data-icon="clock"><div class="val" id="bi-pending">–</div><div class="lbl">Pending / Unaccommodated</div></div>
+        <div class="kpi purple" data-icon="calendar"><div class="val" id="bi-avgdaily">–</div><div class="lbl">Avg Daily Leads</div></div>
       </div>
       <div class="kpi-row" style="margin-top:14px;">
-        <div class="kpi green"><div class="val" id="bi-mql">–</div><div class="lbl">MQLs (Discovery+Evaluation+Intent)</div></div>
-        <div class="kpi blue"><div class="val" id="bi-sql">–</div><div class="lbl">SQLs (Engineering RFQ = Yes)</div></div>
-        <div class="kpi yellow"><div class="val" id="bi-proposals">–</div><div class="lbl">Proposals Sent</div></div>
-        <div class="kpi green"><div class="val" id="bi-won">–</div><div class="lbl">Projects Won</div></div>
+        <div class="kpi green" data-icon="filter"><div class="val" id="bi-mql">–</div><div class="lbl">MQLs (Discovery+Evaluation+Intent)</div></div>
+        <div class="kpi blue" data-icon="check-circle"><div class="val" id="bi-sql">–</div><div class="lbl">SQLs (Engineering RFQ = Yes)</div></div>
+        <div class="kpi yellow" data-icon="send"><div class="val" id="bi-proposals">–</div><div class="lbl">Proposals Sent</div></div>
+        <div class="kpi green" data-icon="trophy"><div class="val" id="bi-won">–</div><div class="lbl">Projects Won</div></div>
       </div>
       <div class="grid2">
         <div class="card">
@@ -475,6 +505,7 @@ function renderOverview(d) {
   document.getElementById('ov-engRate').textContent = d.engRate + "%";
   document.getElementById('ov-avgPos').textContent = d.gscPos;
   document.getElementById('ov-ctr').textContent = d.gscCtr + "%";
+  document.getElementById('ov-avgPerDay').textContent = bi.avgDaily || "0";
 }
 
 function renderRecommendations(d) {
